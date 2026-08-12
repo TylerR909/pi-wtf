@@ -1,0 +1,50 @@
+{
+  "name": "pi-trainer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A toy / practical joke website for playing with the digits of π",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run i18n:compile && tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "i18n:extract": "lingui extract",
+    "i18n:compile": "lingui compile",
+    "prepare": "lefthook install || true"
+  },
+  "dependencies": {
+    "@lingui/core": "^6.6.0",
+    "@lingui/react": "^6.6.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.8",
+    "@lingui/babel-plugin-lingui-macro": "^6.6.0",
+    "@lingui/cli": "^6.6.0",
+    "@lingui/format-po": "^6.6.0",
+    "@lingui/vite-plugin": "^6.6.0",
+    "@rolldown/plugin-babel": "^0.2.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "jsdom": "^27.0.1",
+    "lefthook": "^1.13.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0",
+    "vitest": "^4.1.10"
+  }
+}

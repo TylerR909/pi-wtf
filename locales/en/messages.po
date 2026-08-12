@@ -1,0 +1,93 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-08-11 22:46-0600\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en\n"
+
+#: src/components/Footer.tsx
+msgid "— original site content is copyrighted by default; no paperwork required for © to exist. π itself is public domain math. Don't sue circles."
+msgstr "— original site content is copyrighted by default; no paperwork required for © to exist. π itself is public domain math. Don't sue circles."
+
+#: src/modes/TrainerMode.tsx
+msgid "← / → or click"
+msgstr "← / → or click"
+
+#: src/modes/BaseMode.tsx
+msgid "Base"
+msgstr "Base"
+
+#: src/components/Footer.tsx
+msgid "Buy me a coffee"
+msgstr "Buy me a coffee"
+
+#: src/modes/QuizMode.tsx
+msgid "Chaos"
+msgstr "Chaos"
+
+#: src/modes/TrainerMode.tsx
+msgid "Correct"
+msgstr "Correct"
+
+#: src/modes/BaseMode.tsx
+msgid "Dynamically converted from the decimal expansion. Bases 2–36. Yes, dozenal is real."
+msgstr "Dynamically converted from the decimal expansion. Bases 2–36. Yes, dozenal is real."
+
+#: src/modes/QuizMode.tsx
+msgid "Hints"
+msgstr "Hints"
+
+#: src/modes/QuizMode.tsx
+msgid "L / R"
+msgstr "L / R"
+
+#: src/modes/TrainerMode.tsx
+msgid "Next digit?"
+msgstr "Next digit?"
+
+#: src/components/ModeSelector.tsx
+msgid "Pi Trainer — a serious tool for unserious people"
+msgstr "Pi Trainer — a serious tool for unserious people"
+
+#: src/modes/QuizMode.tsx
+msgid "Pick one"
+msgstr "Pick one"
+
+#: src/modes/QuizMode.tsx
+msgid "Positions are 1-indexed from the leading 3."
+msgstr "Positions are 1-indexed from the leading 3."
+
+#: src/modes/TrainerMode.tsx
+msgid "Reset"
+msgstr "Reset"
+
+#: src/modes/TrainerMode.tsx
+msgid "Streak"
+msgstr "Streak"
+
+#: src/modes/QuizMode.tsx
+msgid "Submit"
+msgstr "Submit"
+
+#: src/components/ThemePicker.tsx
+msgid "Theme"
+msgstr "Theme"
+
+#: src/modes/QuizMode.tsx
+msgid "Type it"
+msgstr "Type it"
+
+#. placeholder {0}: formatOrdinal(q.index)
+#: src/modes/QuizMode.tsx
+msgid "What's the {0} digit of π?"
+msgstr "What's the {0} digit of π?"
+
+#: src/modes/TrainerMode.tsx
+msgid "Wrong"
+msgstr "Wrong"
+
+#: src/modes/BaseMode.tsx
+msgid "π in base {base}"
+msgstr "π in base {base}"
