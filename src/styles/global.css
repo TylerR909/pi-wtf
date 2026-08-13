@@ -90,6 +90,7 @@ html,
 body,
 #root {
   height: 100%;
+  min-height: 100dvh;
   margin: 0;
 }
 
@@ -553,7 +554,10 @@ a {
   align-items: stretch;
   overflow-x: hidden;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+}
+/* iOS: a scrolled overflow box eats long-press. Freeze scroll so select can start. */
+.pi-mode.is-selecting {
+  overflow-y: hidden;
 }
 .pi-probe {
   position: absolute;
@@ -582,8 +586,15 @@ a {
   overflow: visible;
   width: 100%;
   min-height: 100%;
+  -webkit-user-select: text;
   user-select: text;
+  -webkit-touch-callout: default;
   font-variant-numeric: tabular-nums;
+}
+.pi-hi,
+.pi-rest {
+  -webkit-user-select: text;
+  user-select: text;
 }
 .pi-hi {
   color: var(--accent);
@@ -709,11 +720,16 @@ a {
 .trainer-score {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  justify-content: center;
+  align-content: flex-start;
+  column-gap: 0.75rem;
+  row-gap: 0.15rem;
+  /* Two lines reserved so Reset wrapping doesn't shove the cards. */
+  min-height: 2.55em;
+  line-height: 1.2;
   font-size: 0.85rem;
   color: var(--fg-muted);
   font-family: var(--font-mono);
-  justify-content: center;
 }
 .trainer-score .linkish {
   color: var(--accent-dim);
@@ -729,6 +745,8 @@ a {
   gap: clamp(1rem, 4vw, 3rem);
   align-items: center;
   width: min(920px, 100%);
+  touch-action: pan-y;
+  user-select: none;
 }
 .trainer-mode.is-focused .trainer-chrome {
   opacity: 0;
@@ -1045,6 +1063,8 @@ a {
   overflow: auto;
   position: relative;
   padding: 0.85rem 1rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   /* Fixed dark well + bright phosphor. Theme --bg/--correct are often
      mid-tone pastels (Celestia) or dark greens (Pokéball) — mixing them
      here made the stream the same luminance as the field. */
@@ -1116,17 +1136,6 @@ html[data-theme="celestia"] .pi-hi::selection {
   color: inherit;
   text-shadow: none;
   -webkit-text-fill-color: currentColor;
-}
-.hacker-ghost {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  border: 0;
-  padding: 0;
-  bottom: 0.5rem;
-  left: 0.5rem;
-  pointer-events: none;
 }
 .app.is-fs .hacker-mode {
   padding: 0;
@@ -1441,6 +1450,7 @@ html[data-theme="celestia"] .pi-hi::selection {
   color: var(--fg-faint);
 }
 @media (pointer: coarse) {
+  .trainer-board,
   .quiz-swipe {
     touch-action: none;
   }
@@ -1584,7 +1594,7 @@ html[data-theme="celestia"] .pi-hi::selection {
     column-gap: 0.4rem;
     row-gap: 0;
     align-items: center;
-    padding: max(0.5rem, env(safe-area-inset-top)) 0.65rem 0.45rem;
+    padding: calc(env(safe-area-inset-top, 0px) + 0.55rem) 0.65rem 0.4rem;
   }
   .brand,
   .brand[data-visible="0"] {
@@ -1677,7 +1687,7 @@ html[data-theme="celestia"] .pi-hi::selection {
   .chrome-bottom {
     display: flex;
     justify-content: center;
-    padding: 0.15rem 0.75rem calc(0.25rem + env(safe-area-inset-bottom));
+    padding: 0.1rem 0.75rem 0.4rem;
   }
   .chrome-bottom.is-drawer.is-hidden {
     opacity: 0;

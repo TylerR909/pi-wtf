@@ -161,12 +161,27 @@ export function PiMode() {
       wrap.scrollTop = y;
     };
 
+    const liveSel = () => {
+      const sel = window.getSelection();
+      return Boolean(sel && !sel.isCollapsed && el.contains(sel.anchorNode));
+    };
+
     const rebuild = () => {
+      // replaceChildren kills iOS selection handles
+      if (liveSel()) return;
       if (paintGrid()) paintHighlight();
     };
 
     rebuild();
-    const ro = new ResizeObserver(rebuild);
+    let box = { w: wrap.clientWidth, h: wrap.clientHeight };
+    const ro = new ResizeObserver(() => {
+      const w = wrap.clientWidth;
+      const h = wrap.clientHeight;
+      // iOS toolbar / Dynamic Island jitter shouldn't wipe the wall
+      if (Math.abs(w - box.w) < 2 && Math.abs(h - box.h) < 48) return;
+      box = { w, h };
+      rebuild();
+    });
     ro.observe(wrap);
     const unsub = subscribeProgress(paintHighlight);
 
@@ -241,12 +256,54 @@ export function PiMode() {
       tip.style.top = `${top}px`;
     };
 
+    let holdTimer: ReturnType<typeof setTimeout> | null = null;
+    let touchY = 0;
+    let selecting = false;
+
+    const clearHold = () => {
+      if (holdTimer == null) return;
+      clearTimeout(holdTimer);
+      holdTimer = null;
+    };
+
+    const stopSelecting = () => {
+      selecting = false;
+      wrap.classList.remove("is-selecting");
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) {
+        clearHold();
+        return;
+      }
+      touchY = e.touches[0]!.clientY;
+      clearHold();
+      holdTimer = setTimeout(() => {
+        holdTimer = null;
+        selecting = true;
+        wrap.classList.add("is-selecting");
+      }, 380);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const y = e.touches[0]?.clientY ?? touchY;
+      if (Math.abs(y - touchY) > 10) clearHold();
+    };
+
+    const onTouchEnd = () => {
+      clearHold();
+      requestAnimationFrame(() => {
+        if (!liveSel()) stopSelecting();
+      });
+    };
+
     const syncTip = () => {
       const tip = tipRef.current;
       if (!tip) return;
       const sel = window.getSelection();
       if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
         hideTip();
+        if (selecting) stopSelecting();
         return;
       }
       const range = sel.getRangeAt(0);
@@ -291,9 +348,14 @@ export function PiMode() {
     el.addEventListener("copy", onCopy);
     document.addEventListener("selectionchange", syncTip);
     wrap.addEventListener("scroll", onScroll, { passive: true });
+    wrap.addEventListener("touchstart", onTouchStart, { passive: true });
+    wrap.addEventListener("touchmove", onTouchMove, { passive: true });
+    wrap.addEventListener("touchend", onTouchEnd);
+    wrap.addEventListener("touchcancel", onTouchEnd);
     window.addEventListener("resize", syncTip);
 
     return () => {
+      clearHold();
       ro.disconnect();
       unsub();
       unsubPi();
@@ -301,6 +363,10 @@ export function PiMode() {
       el.removeEventListener("copy", onCopy);
       document.removeEventListener("selectionchange", syncTip);
       wrap.removeEventListener("scroll", onScroll);
+      wrap.removeEventListener("touchstart", onTouchStart);
+      wrap.removeEventListener("touchmove", onTouchMove);
+      wrap.removeEventListener("touchend", onTouchEnd);
+      wrap.removeEventListener("touchcancel", onTouchEnd);
       window.removeEventListener("resize", syncTip);
     };
   }, [fontPx, i18n.locale]);

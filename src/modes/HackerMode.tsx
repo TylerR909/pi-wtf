@@ -2,14 +2,12 @@ import { t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { useEffect, useRef } from "react";
 import { PI_DIGITS } from "../data/pi-digits";
-import { useNarrow } from "../hooks/useNarrow";
 import { useOptions } from "../options/OptionsContext";
 import { beginMode, reportProgress } from "../progress";
 import { isTypingTarget } from "../utils/keys";
 
 export function HackerMode() {
   useLingui();
-  const narrow = useNarrow();
   const { fontPx } = useOptions({
     fullscreen: true,
     fullscreenKey: false,
@@ -18,11 +16,9 @@ export function HackerMode() {
     defaultFontSize: "m",
   });
   const streamRef = useRef<HTMLPreElement>(null);
-  const ghostRef = useRef<HTMLInputElement>(null);
   const cursor = useRef(0);
   const countRef = useRef<HTMLDivElement>(null);
   const dumpRef = useRef<(n: number) => void>(() => {});
-  const ptrRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     beginMode("hacker");
@@ -110,42 +106,19 @@ export function HackerMode() {
     <div
       className="mode hacker-mode"
       style={{ ["--hacker-fs" as string]: `${fontPx}px` }}
-      aria-label={t`Hacker typer: mash keys for pi`}
+      aria-label={t`Hacker typer: mash keys or tap for pi`}
     >
       <div
         className="hacker-scroll"
         onPointerDown={(e) => {
-          ptrRef.current = { x: e.clientX, y: e.clientY };
-        }}
-        onPointerUp={(e) => {
-          const p = ptrRef.current;
-          ptrRef.current = null;
-          if (!p) return;
-          if (Math.hypot(e.clientX - p.x, e.clientY - p.y) > 14) return;
-          if (e.pointerType === "mouse") return;
+          if (e.button !== 0) return;
           dumpRef.current(3 + Math.floor(Math.random() * 8));
-          if (narrow) ghostRef.current?.focus();
         }}
       >
         <pre ref={streamRef} className="hacker-stream" />
         <span className="hacker-cursor" aria-hidden>
           █
         </span>
-        {narrow && (
-          <input
-            ref={ghostRef}
-            className="hacker-ghost"
-            inputMode="text"
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck={false}
-            aria-label={t`Hacker typer: mash keys for pi`}
-            value=""
-            onChange={(e) => {
-              e.currentTarget.value = "";
-            }}
-          />
-        )}
       </div>
       <div ref={countRef} className="digit-meta">
         {t`${0} digits spilled`}

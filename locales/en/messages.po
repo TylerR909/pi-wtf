@@ -214,8 +214,8 @@ msgid "Hacker"
 msgstr "Hacker"
 
 #: src/modes/HackerMode.tsx
-msgid "Hacker typer: mash keys for pi"
-msgstr "Hacker typer: mash keys for pi"
+msgid "Hacker typer: mash keys or tap for pi"
+msgstr "Hacker typer: mash keys or tap for pi"
 
 #: src/modes/TrainerMode.tsx
 msgid "Hardcore"
@@ -356,6 +356,10 @@ msgstr "Reset"
 msgid "Right candidate {0}"
 msgstr "Right candidate {0}"
 
+#: src/modes/BaseMode.tsx
+msgid "Roman"
+msgstr "Roman"
+
 #: src/modes/QuizMode.tsx
 msgid "Score"
 msgstr "Score"
@@ -463,6 +467,10 @@ msgstr "π in base {base}"
 #: src/components/ModeSelector.tsx
 msgid "π in binary, hex, …"
 msgstr "π in binary, hex, …"
+
+#: src/modes/BaseMode.tsx
+msgid "π in Roman numerals (not a real base)"
+msgstr "π in Roman numerals (not a real base)"
 
 #: src/modes/BaseMode.tsx
 msgid "π in Wingdings (not a real base)"

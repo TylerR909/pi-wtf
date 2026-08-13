@@ -2,6 +2,11 @@ type MotionEventCtor = typeof DeviceMotionEvent & {
   requestPermission?: () => Promise<PermissionState | "granted" | "denied">;
 };
 
+export function motionNeedsPermission(): boolean {
+  if (typeof DeviceMotionEvent === "undefined") return false;
+  return typeof (DeviceMotionEvent as MotionEventCtor).requestPermission === "function";
+}
+
 /** iOS 13+ needs a user-gesture call. Android / desktop just listen. */
 export async function ensureMotionPermission(): Promise<boolean> {
   if (typeof window === "undefined" || typeof DeviceMotionEvent === "undefined") return false;

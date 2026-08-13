@@ -1,12 +1,13 @@
 import { useEffect, useRef } from "react";
 import { ensureMotionPermission, motionDelta } from "../utils/motion";
 
-const THRESHOLD = 24;
+const THRESHOLD_USER = 16;
+const THRESHOLD_GRAV = 20;
 const COOLDOWN_MS = 1400;
 
 /**
- * `arm`: Rain + phone — request iOS motion permission on the fullscreen tap.
- * `active`: also in fullscreen — actually change the theme on shake.
+ * `arm`: Rain + phone — listen / request iOS motion on a tap (PWA or Safari).
+ * `active`: actually change the theme on shake.
  */
 export function useShake(arm: boolean, active: boolean, onShake: () => void): void {
   const onShakeRef = useRef(onShake);
@@ -23,7 +24,9 @@ export function useShake(arm: boolean, active: boolean, onShake: () => void): vo
 
     const onMotion = (e: DeviceMotionEvent) => {
       if (!activeRef.current) return;
-      const a = e.accelerationIncludingGravity ?? e.acceleration;
+      const user = e.acceleration;
+      const grav = e.accelerationIncludingGravity;
+      const a = user?.x != null && user.y != null && user.z != null ? user : grav;
       if (!a || a.x == null || a.y == null || a.z == null) return;
       const next = { x: a.x, y: a.y, z: a.z };
       if (!prev) {
@@ -32,7 +35,8 @@ export function useShake(arm: boolean, active: boolean, onShake: () => void): vo
       }
       const d = motionDelta(prev, next);
       prev = next;
-      if (d < THRESHOLD) return;
+      const need = user?.x != null ? THRESHOLD_USER : THRESHOLD_GRAV;
+      if (d < need) return;
       const now = performance.now();
       if (now - lastAt < COOLDOWN_MS) return;
       lastAt = now;
@@ -54,14 +58,13 @@ export function useShake(arm: boolean, active: boolean, onShake: () => void): vo
       });
     };
 
-    // Android: no prompt — start immediately. iOS: wait for FS / canvas tap.
-    void ensureMotionPermission().then((ok) => {
-      if (ok) start();
-    });
-    window.addEventListener("click", onGesture, true);
+    // Attach now (Android / already-granted iOS). First-time iOS still needs
+    // requestPermission() inside the pointerdown below.
+    start();
+    window.addEventListener("pointerdown", onGesture, true);
 
     return () => {
-      window.removeEventListener("click", onGesture, true);
+      window.removeEventListener("pointerdown", onGesture, true);
       window.removeEventListener("devicemotion", onMotion);
     };
   }, [arm]);

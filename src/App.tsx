@@ -34,6 +34,7 @@ import {
   storeThemeId,
   type ThemeId,
 } from "./themes/themes";
+import { isFullscreenNow, subscribeFullscreen } from "./utils/fullscreen";
 
 const initialTheme = loadStoredThemeId();
 applyTheme(getTheme(initialTheme));
@@ -85,19 +86,15 @@ function AppChrome() {
 
   const immersive = useMemo(() => MODES.find((m) => m.id === mode)?.immersive ?? false, [mode]);
   const narrow = useNarrow();
-  const [docFs, setDocFs] = useState(() => Boolean(document.fullscreenElement));
+  const [docFs, setDocFs] = useState(() => isFullscreenNow());
   // Phones keep chrome up — idle/focus fade is a desktop “get out of the way” trick.
   const { chromeVisible } = useChromeVisibility(immersive, docFs, !idleOk || narrow);
-  useShake(narrow && mode === "chaos", narrow && docFs && mode === "chaos", () => {
+  useShake(narrow && mode === "chaos", narrow && mode === "chaos", () => {
     setThemeId((cur) => randomThemeId(cur));
   });
   const [fsExitOn, setFsExitOn] = useState(true);
 
-  useEffect(() => {
-    const sync = () => setDocFs(Boolean(document.fullscreenElement));
-    document.addEventListener("fullscreenchange", sync);
-    return () => document.removeEventListener("fullscreenchange", sync);
-  }, []);
+  useEffect(() => subscribeFullscreen(() => setDocFs(isFullscreenNow())), []);
 
   useEffect(() => {
     if (!docFs) {
