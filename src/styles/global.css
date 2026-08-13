@@ -406,13 +406,24 @@ a {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 0.3rem 0.5rem;
+  padding: 0 0.5rem;
   font-size: 0.75rem;
   color: var(--fg-muted);
   max-width: 9.5rem;
+  height: 1.85rem;
 }
 .theme-stepper {
   display: flex;
+  align-items: stretch;
+  height: 1.85rem;
+  border-radius: 8px;
+}
+.theme-stepper .stepper-btn {
+  padding: 0;
+  width: 1.85rem;
+  flex: 0 0 1.85rem;
+  font-size: 0.85rem;
+  line-height: 1;
 }
 .theme-stepper label {
   display: flex;
@@ -422,12 +433,14 @@ a {
 .theme-stepper select {
   display: block;
   width: 100%;
+  height: 100%;
   min-width: 6.75rem;
   max-width: 9.5rem;
   margin: 0;
-  padding: 0.3rem 0.45rem;
+  padding: 0 0.45rem;
   font-size: 0.75rem;
   font-weight: 600;
+  line-height: 1;
   color: var(--bg);
   background: var(--accent);
   border: none;
@@ -1773,15 +1786,21 @@ html[data-theme="celestia"] .pi-hi::selection {
     width: 100%;
     max-width: none;
     font-size: 16px;
-    padding: 0.5rem 0.55rem;
+    padding: 0 0.55rem;
+    height: 2.5rem;
   }
   .theme-stepper {
     width: 100%;
+    height: 2.5rem;
+  }
+  .theme-stepper .stepper-btn {
+    width: 2.5rem;
+    flex-basis: 2.5rem;
   }
   .theme-stepper select {
     max-width: none;
     font-size: 16px;
-    padding: 0.5rem 0.55rem;
+    padding: 0 0.55rem;
   }
   .site-footer {
     grid-column: auto;
