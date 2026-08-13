@@ -1,5 +1,6 @@
 node_modules
 dist
+dev-dist
 .git
 .github
 coverage
@@ -11,3 +12,6 @@ coverage
 .env.*
 lefthook.yml
 .lefthook*
+.wrangler
+.grok
+*.tsbuildinfo

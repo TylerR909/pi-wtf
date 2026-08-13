@@ -1,0 +1,28 @@
+# Cloudflare Pages / Workers static assets (ignored by nginx).
+# Keep crawler files cacheable but not immutable.
+
+/robots.txt
+  Cache-Control: public, max-age=86400
+  Content-Type: text/plain; charset=utf-8
+
+/sitemap.xml
+  Cache-Control: public, max-age=86400
+  Content-Type: application/xml; charset=utf-8
+
+/llms.txt
+  Cache-Control: public, max-age=86400
+  Content-Type: text/plain; charset=utf-8
+
+/learn.html
+  Cache-Control: public, max-age=86400
+
+/og.jpg
+  Cache-Control: public, max-age=604800
+
+/LICENSE
+  Cache-Control: public, max-age=86400
+  Content-Type: text/plain; charset=utf-8
+
+/THIRD_PARTY_NOTICES.md
+  Cache-Control: public, max-age=86400
+  Content-Type: text/plain; charset=utf-8

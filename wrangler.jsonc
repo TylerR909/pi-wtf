@@ -1,0 +1,12 @@
+{
+  // Cloudflare Workers Static Assets — not classic Pages.
+  // Dashboard: Build `npm run build` → Deploy `npx wrangler deploy`
+  // Project name must match "name" below.
+  "name": "pi-wtf",
+  "compatibility_date": "2026-08-13",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  "preview_urls": true
+}

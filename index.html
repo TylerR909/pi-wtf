@@ -3,12 +3,102 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>π</text></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Pi Trainer — a toy / practical joke website for playing with the digits of π." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Learn the digits of π — pi trainer, quiz &amp; matrix | piwtf</title>
+    <meta
+      name="description"
+      content="Learn pi for free. Memorize digits of π with a pi trainer, take a pi quiz (what’s the nth digit of pi?), scroll the digits, or watch a π matrix rain. I want to learn pi — start here."
+    />
+    <link rel="canonical" href="https://piwtf.com/" />
+    <link rel="sitemap" type="application/xml" href="https://piwtf.com/sitemap.xml" />
+    <link rel="alternate" type="text/plain" href="https://piwtf.com/llms.txt" title="LLM instructions" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="piwtf" />
+    <meta property="og:url" content="https://piwtf.com/" />
+    <meta property="og:title" content="Learn the digits of π — pi trainer, quiz & matrix | piwtf" />
+    <meta
+      property="og:description"
+      content="Free pi trainer and pi quiz. What’s the nth digit of π? How do I learn pi? Digits of pi, a measuring tape, and a Matrix rain that’s only 3.14159…"
+    />
+    <meta property="og:image" content="https://piwtf.com/og.jpg" />
+    <meta property="og:image:alt" content="The π symbol over a rain of digits — piwtf, a site to learn pi" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="es_ES" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Learn the digits of π — pi trainer & quiz | piwtf" />
+    <meta
+      name="twitter:description"
+      content="Pi trainer, pi quiz, digits of pi, π matrix rain. Digit #1 is 3. The 57th digit is 7. The 100th is 7."
+    />
+    <meta name="twitter:image" content="https://piwtf.com/og.jpg" />
     <meta name="theme-color" content="#0e0e10" />
     <meta name="color-scheme" content="dark light" />
-    <!-- Long cache-friendly static site; edge-cache everything under /assets -->
-    <title>Pi Trainer</title>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="piwtf" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://piwtf.com/#site",
+            "name": "piwtf",
+            "alternateName": ["pi wtf", "pi trainer", "pi quiz", "digits of pi"],
+            "url": "https://piwtf.com/",
+            "description": "Learn and memorize the digits of π. Pi trainer, pi quiz, nth digit practice, and a π matrix rain.",
+            "inLanguage": ["en", "es"]
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://piwtf.com/#app",
+            "name": "piwtf",
+            "url": "https://piwtf.com/",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "Any",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "featureList": [
+              "Pi trainer",
+              "Pi quiz — what’s the nth digit of pi?",
+              "Digits of pi wall",
+              "Pi matrix rain",
+              "One-digit-at-a-time drill"
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "How do I learn pi?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Open https://piwtf.com and use the Pi Trainer (next digit) or Pi Quiz (what’s the nth digit?). Free, no account."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What is the 57th digit of pi?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "The 57th digit of π is 7. Digit #1 is 3; 3.14 are the first three digits. Source: https://piwtf.com/learn.html"
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What is the 100th digit of pi?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "The 100th digit of π is 7. Digit #1 is 3. Source: https://piwtf.com/"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -18,6 +108,14 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>Learn the digits of π — piwtf</h1>
+      <p>
+        Free <a href="https://piwtf.com/learn.html">pi trainer</a> and pi quiz. What’s the nth digit of pi?
+        How do I learn pi? Start at <a href="https://piwtf.com/">piwtf.com</a>.
+      </p>
+      <p>Digit #1 is 3. The 57th digit of π is 7. The 100th is 7. Full table: <a href="/pi.txt">/pi.txt</a>.</p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

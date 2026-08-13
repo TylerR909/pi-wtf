@@ -1,11 +1,11 @@
 pre-commit:
-  parallel: true
   commands:
-    biome:
-      glob: "*.{js,jsx,ts,tsx,json,css,html}"
-      run: npx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+    lint:
+      run: npm run lint:fix
+      stage_fixed: true
+    i18n:
+      glob: "{src/**/*.{ts,tsx},locales/**/*.po}"
+      run: npm run i18n:extract
       stage_fixed: true
     typecheck:
-      run: npx tsc -b --pretty false
-    tests:
-      run: npm test
+      run: npm run typecheck

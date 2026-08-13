@@ -7,88 +7,463 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Language: es\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
 
-#: src/components/Footer.tsx
-msgid "— original site content is copyrighted by default; no paperwork required for © to exist. π itself is public domain math. Don't sue circles."
-msgstr "— el contenido original del sitio tiene copyright por defecto; no hace falta papeleo para que exista el ©. π es matemática de dominio público. No demandes a los círculos."
+#. placeholder {0}: formatOrdinalWord(round.index + 1)
+#: src/modes/TrainerMode.tsx
+msgid "{0} digit?"
+msgstr "¿Dígito {0}?"
+
+#. placeholder {0}: 0
+#: src/modes/HackerMode.tsx
+msgid "{0} digits spilled"
+msgstr "{0} dígitos derramados"
+
+#: src/modes/HackerMode.tsx
+msgid "{n} digits spilled"
+msgstr "{n} dígitos derramados"
 
 #: src/modes/TrainerMode.tsx
-msgid "← / → or click"
-msgstr "← / → o clic"
+msgid "← / → pick a side · Backspace reset"
+msgstr "← / → elige un lado · Backspace reinicia"
 
+#: src/modes/TapeMode.tsx
+msgid "← slower / rewind · → faster · scroll to scrub · Space pause"
+msgstr "← más lento / rebobinar · → más rápido · desplaza para avanzar · Espacio pausa"
+
+#: src/modes/TrainerMode.tsx
+msgid "→ pulls the left card onto the stack · ← pulls the right card"
+msgstr "→ mete la carta izquierda · ← mete la carta derecha"
+
+#: src/components/ThemePicker.tsx
+msgid "☕ Diner"
+msgstr "☕ Diner"
+
+#: src/components/ThemePicker.tsx
+msgid "⚠️ Caution Tape"
+msgstr "⚠️ Cinta de precaución"
+
+#: src/components/ThemePicker.tsx
+msgid "✏️ Chalkboard"
+msgstr "✏️ Pizarra"
+
+#: src/components/ThemePicker.tsx
+msgid "🌅 Chillwave"
+msgstr "🌅 Chillwave"
+
+#: src/components/ThemePicker.tsx
+msgid "🌙 Midnight"
+msgstr "🌙 Medianoche"
+
+#: src/components/ThemePicker.tsx
+msgid "🌭 Hotdog Stand"
+msgstr "🌭 Puesto de hot dogs"
+
+#: src/components/ThemePicker.tsx
+msgid "🌴 Vaporwave"
+msgstr "🌴 Vaporwave"
+
+#: src/components/ThemePicker.tsx
+msgid "🍓 Raspberry"
+msgstr "🍓 Frambuesa"
+
+#: src/components/ThemePicker.tsx
+msgid "🍭 Cotton Candy"
+msgstr "🍭 Algodón de azúcar"
+
+#: src/components/ThemePicker.tsx
+msgid "💻 Terminal"
+msgstr "💻 Terminal"
+
+#: src/components/ThemePicker.tsx
+msgid "📄 Paper"
+msgstr "📄 Papel"
+
+#: src/components/ThemePicker.tsx
+msgid "📐 Blueprint"
+msgstr "📐 Plano"
+
+#: src/components/ThemePicker.tsx
+msgid "📺 Amber CRT"
+msgstr "📺 CRT ámbar"
+
+#: src/components/ThemePicker.tsx
+msgid "🔴 Pokéball"
+msgstr "🔴 Pokéball"
+
+#: src/components/ThemePicker.tsx
+msgid "🕶️ Noir"
+msgstr "🕶️ Noir"
+
+#: src/components/ThemePicker.tsx
+msgid "🦄 Princess Celestia"
+msgstr "🦄 Princesa Celestia"
+
+#: src/modes/QuizMode.tsx
+msgid "50/50"
+msgstr "50/50"
+
+#: src/components/ModeSelector.tsx
+msgid "a serious tool for unserious people"
+msgstr "una herramienta seria para gente poco seria"
+
+#: src/components/ModeSelector.tsx
 #: src/modes/BaseMode.tsx
 msgid "Base"
 msgstr "Base"
+
+#. placeholder {0}: p.base
+#: src/modes/BaseMode.tsx
+msgid "Base {0}"
+msgstr "Base {0}"
+
+#: src/modes/BaseMode.tsx
+msgid "Base36"
+msgstr "Base36"
+
+#. placeholder {0}: stats.bestStreak
+#: src/modes/TrainerMode.tsx
+msgid "best {0}"
+msgstr "mejor {0}"
+
+#: src/modes/BaseMode.tsx
+msgid "Binary"
+msgstr "Binario"
 
 #: src/components/Footer.tsx
 msgid "Buy me a coffee"
 msgstr "Invítame un café"
 
-#: src/modes/QuizMode.tsx
-msgid "Chaos"
-msgstr "Caos"
+#: src/modes/TrainerMode.tsx
+msgid "Classic"
+msgstr "Clásico"
 
 #: src/modes/TrainerMode.tsx
 msgid "Correct"
 msgstr "Correctas"
 
+#. placeholder {0}: q.correct
+#: src/modes/QuizMode.tsx
+msgid "Correct! It was {0}"
+msgstr "¡Correcto! Era {0}"
+
 #: src/modes/BaseMode.tsx
-msgid "Dynamically converted from the decimal expansion. Bases 2–36. Yes, dozenal is real."
-msgstr "Convertido dinámicamente desde la expansión decimal. Bases 2–36. Sí, el dozenal es real."
+msgid "Decimal"
+msgstr "Decimal"
+
+#: src/modes/PiMode.tsx
+#: src/modes/TapeMode.tsx
+msgid "decimal point"
+msgstr "punto decimal"
+
+#: src/components/ModeSelector.tsx
+msgid "Digit"
+msgstr "Dígito"
+
+#. placeholder {0}: dn.toLocaleString()
+#: src/modes/TapeMode.tsx
+msgid "digit #{0}"
+msgstr "dígito #{0}"
+
+#: src/modes/QuizMode.tsx
+msgid "digit of π?"
+msgstr "dígito de π?"
+
+#: src/modes/ChaosMode.tsx
+msgid "Digit rain"
+msgstr "Lluvia de dígitos"
+
+#: src/modes/BaseMode.tsx
+msgid "Dozenal"
+msgstr "Docenal"
+
+#: src/modes/TrainerMode.tsx
+msgid "Endless"
+msgstr "Infinito"
+
+#: src/components/FullscreenButton.tsx
+msgid "exit"
+msgstr "salir"
+
+#: src/components/FullscreenButton.tsx
+msgid "Exit fullscreen"
+msgstr "Salir de pantalla completa"
+
+#: src/components/FontSizeControl.tsx
+msgid "Font size"
+msgstr "Tamaño de fuente"
+
+#: src/components/FullscreenButton.tsx
+msgid "full"
+msgstr "pantalla"
+
+#: src/components/FullscreenButton.tsx
+msgid "Fullscreen"
+msgstr "Pantalla completa"
+
+#: src/modes/TrainerMode.tsx
+msgid "Game Over"
+msgstr "Game Over"
+
+#: src/components/ModeSelector.tsx
+msgid "Hacker"
+msgstr "Hacker"
+
+#: src/modes/HackerMode.tsx
+msgid "Hacker typer: mash keys for pi"
+msgstr "Hacker typer: machaca teclas para pi"
+
+#: src/modes/TrainerMode.tsx
+msgid "Hardcore"
+msgstr "Hardcore"
+
+#: src/modes/BaseMode.tsx
+msgid "Hex"
+msgstr "Hex"
+
+#: src/components/ChromeBottom.tsx
+msgid "Hide footer"
+msgstr "Ocultar pie"
 
 #: src/modes/QuizMode.tsx
 msgid "Hints"
 msgstr "Pistas"
 
-#: src/modes/QuizMode.tsx
-msgid "L / R"
-msgstr "I / D"
+#: src/modes/TrainerMode.tsx
+msgid "Invert"
+msgstr "Invertir"
 
 #: src/modes/TrainerMode.tsx
-msgid "Next digit?"
-msgstr "¿Siguiente dígito?"
+msgid "Invert: → pulls left in, ← pulls right in · Backspace reset"
+msgstr "Invertir: → mete la izquierda, ← mete la derecha · Backspace reinicia"
+
+#: src/components/LocalePicker.tsx
+msgid "Language"
+msgstr "Idioma"
 
 #: src/components/ModeSelector.tsx
-msgid "Pi Trainer — a serious tool for unserious people"
-msgstr "Pi Trainer — una herramienta seria para gente poco seria"
+msgid "Left / right next digit"
+msgstr "Izquierda / derecha, siguiente dígito"
+
+#. placeholder {0}: round.left
+#: src/modes/TrainerMode.tsx
+msgid "Left candidate {0}"
+msgstr "Candidato izquierdo {0}"
+
+#: src/components/ModeSelector.tsx
+msgid "Mash keys like hackertyper"
+msgstr "Machaca teclas como hackertyper"
+
+#: src/components/ModeSelector.tsx
+msgid "Matrix but π"
+msgstr "Matrix, pero π"
+
+#: src/modes/ChaosMode.tsx
+msgid "Matrix, but it's just π. You're welcome."
+msgstr "Matrix, pero es solo π. De nada."
+
+#: src/components/ModeSelector.tsx
+msgid "Modes"
+msgstr "Modos"
+
+#: src/modes/BaseMode.tsx
+msgid "Next base"
+msgstr "Base siguiente"
+
+#: src/components/ModeSelector.tsx
+msgid "Next mode"
+msgstr "Modo siguiente"
+
+#: src/components/Footer.tsx
+msgid "No warranties"
+msgstr "Sin garantías"
+
+#. placeholder {0}: q.correct
+#: src/modes/QuizMode.tsx
+msgid "Nope — it was {0}"
+msgstr "Nop — era {0}"
+
+#: src/components/ModeSelector.tsx
+msgid "Nth digit?"
+msgstr "¿El dígito n?"
+
+#: src/modes/QuizMode.tsx
+msgid "Number pad"
+msgstr "Teclado numérico"
+
+#: src/modes/BaseMode.tsx
+msgid "Octal"
+msgstr "Octal"
+
+#: src/modes/DigitMode.tsx
+msgid "One digit at a time. Press Space to advance."
+msgstr "Un dígito cada vez. Pulsa Espacio para avanzar."
+
+#: src/modes/TapeMode.tsx
+msgid "paused"
+msgstr "pausado"
+
+#: src/components/ModeSelector.tsx
+msgid "Pi"
+msgstr "Pi"
+
+#: src/modes/BaseMode.tsx
+msgid "Pi in other bases"
+msgstr "Pi en otras bases"
 
 #: src/modes/QuizMode.tsx
 msgid "Pick one"
 msgstr "Elige uno"
 
+#: src/modes/DigitMode.tsx
+msgid "Press Spacebar"
+msgstr "Pulsa la barra espaciadora"
+
+#: src/modes/BaseMode.tsx
+msgid "Previous base"
+msgstr "Base anterior"
+
+#: src/components/ModeSelector.tsx
+msgid "Previous mode"
+msgstr "Modo anterior"
+
 #: src/modes/QuizMode.tsx
-msgid "Positions are 1-indexed from the leading 3."
-msgstr "Las posiciones empiezan en 1 desde el 3 inicial."
+msgid "Pro Mode"
+msgstr "Modo Pro"
+
+#: src/components/ModeSelector.tsx
+msgid "Quiz"
+msgstr "Quiz"
+
+#: src/modes/QuizMode.tsx
+msgid "Quiz: what digit is at position N"
+msgstr "Quiz: qué dígito hay en la posición N"
+
+#: src/components/ModeSelector.tsx
+msgid "Rain"
+msgstr "Lluvia"
 
 #: src/modes/TrainerMode.tsx
 msgid "Reset"
 msgstr "Reiniciar"
 
+#. placeholder {0}: round.right
+#: src/modes/TrainerMode.tsx
+msgid "Right candidate {0}"
+msgstr "Candidato derecho {0}"
+
+#: src/modes/QuizMode.tsx
+msgid "Score"
+msgstr "Puntuación"
+
+#: src/modes/PiMode.tsx
+msgid "Scrollable digits of pi"
+msgstr "Dígitos de pi con desplazamiento"
+
+#: src/modes/ChaosMode.tsx
+msgid "Shake to change theme"
+msgstr "Agita para cambiar el tema"
+
+#: src/components/ChromeBottom.tsx
+msgid "Show footer"
+msgstr "Mostrar pie"
+
+#: src/App.tsx
+msgid "Skip to content"
+msgstr "Saltar al contenido"
+
+#: src/components/ModeSelector.tsx
+msgid "Slow scroll + measuring tape"
+msgstr "Desplazamiento lento + cinta métrica"
+
+#: src/components/ModeSelector.tsx
+msgid "Spacebar one-at-a-time"
+msgstr "Barra espaciadora, uno a uno"
+
 #: src/modes/TrainerMode.tsx
 msgid "Streak"
 msgstr "Racha"
 
+#. placeholder {0}: diedAt === 0 ? "zero" : diedAt
+#: src/modes/TrainerMode.tsx
+msgid "Streak died at {0}."
+msgstr "La racha murió en {0}."
+
 #: src/modes/QuizMode.tsx
-msgid "Submit"
-msgstr "Enviar"
+msgid "Swipe or tap"
+msgstr "Desliza o toca"
+
+#: src/components/ModeSelector.tsx
+msgid "Tape"
+msgstr "Cinta"
+
+#: src/modes/TapeMode.tsx
+msgid "Tape scroll of pi"
+msgstr "Cinta de dígitos de pi"
+
+#: src/modes/BaseMode.tsx
+msgid "Ternary"
+msgstr "Ternario"
 
 #: src/components/ThemePicker.tsx
 msgid "Theme"
 msgstr "Tema"
 
-#: src/modes/QuizMode.tsx
-msgid "Type it"
-msgstr "Escríbelo"
+#: src/components/ModeSelector.tsx
+msgid "Trainer"
+msgstr "Entrenador"
 
-#. placeholder {0}: formatOrdinal(q.index)
-#: src/modes/QuizMode.tsx
-msgid "What's the {0} digit of π?"
-msgstr "¿Cuál es el dígito {0} de π?"
+#: src/modes/TrainerMode.tsx
+msgid "Trainer: pick the next digit"
+msgstr "Entrenador: elige el siguiente dígito"
 
+#: src/modes/TrainerMode.tsx
+msgid "Try again"
+msgstr "Reintentar"
+
+#: src/components/ModeSelector.tsx
+msgid "Wall of digits"
+msgstr "Muro de dígitos"
+
+#: src/modes/QuizMode.tsx
+msgid "What's the"
+msgstr "¿Cuál es el"
+
+#: src/modes/BaseMode.tsx
+msgid "Why? Idk buddy, you clicked the button, not me."
+msgstr "¿Por qué? Ni idea, colega, tú apretaste el botón, no yo."
+
+#: src/modes/BaseMode.tsx
+msgid "Wingdings"
+msgstr "Wingdings"
+
+#: src/modes/QuizMode.tsx
 #: src/modes/TrainerMode.tsx
 msgid "Wrong"
 msgstr "Fallos"
 
+#: src/modes/QuizMode.tsx
+msgid "Your guess"
+msgstr "Tu respuesta"
+
+#. placeholder {0}: 1
+#. placeholder {0}: index + 1
+#: src/modes/DigitMode.tsx
+msgid "π · digit #{0}"
+msgstr "π · dígito #{0}"
+
 #: src/modes/BaseMode.tsx
 msgid "π in base {base}"
 msgstr "π en base {base}"
+
+#: src/components/ModeSelector.tsx
+msgid "π in binary, hex, …"
+msgstr "π en binario, hex, …"
+
+#: src/modes/BaseMode.tsx
+msgid "π in Wingdings (not a real base)"
+msgstr "π en Wingdings (no es una base real)"

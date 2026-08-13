@@ -1,0 +1,44 @@
+name: Something's broken
+description: The digits are lying, or the UI is. Maybe.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a toy. No SLA. PRs are not accepted (All Rights Reserved).
+        If it made you laugh and then immediately fail, that's working as intended.
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options:
+        - Pi
+        - Digit
+        - Trainer
+        - Quiz
+        - Tape
+        - Hacker
+        - Base
+        - Rain
+        - Chrome / theme / other
+    validations:
+      required: true
+
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: Browser + OS, or phone. “Safari on iPhone” is plenty.
+      placeholder: Chrome on macOS, Safari iOS 18, …
+    validations:
+      required: true
+
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened
+      description: What you tapped, what you expected, what you got.
+    validations:
+      required: true

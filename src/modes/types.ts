@@ -1,12 +1,4 @@
-export type ModeId =
-  | "print"
-  | "digit"
-  | "trainer"
-  | "screensaver"
-  | "hacker"
-  | "quiz"
-  | "base"
-  | "chaos";
+export type ModeId = "pi" | "digit" | "trainer" | "tape" | "hacker" | "quiz" | "base" | "chaos";
 
 export interface ModeMeta {
   id: ModeId;

@@ -1,8 +1,9 @@
-const PREFIX = "pi-trainer-";
+const PREFIX = "pi-wtf-";
+const LEGACY_PREFIX = "pi-trainer-";
 
 export function loadJson<T>(key: string, fallback: T): T {
   try {
-    const raw = localStorage.getItem(PREFIX + key);
+    const raw = localStorage.getItem(PREFIX + key) ?? localStorage.getItem(LEGACY_PREFIX + key);
     if (raw == null) return fallback;
     return JSON.parse(raw) as T;
   } catch {

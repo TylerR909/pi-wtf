@@ -8,15 +8,21 @@ describe("piInBase", () => {
   });
 
   it("converts to binary with known prefix", () => {
-    // π ≈ 11.00100100001111110110…₂
-    const s = piInBase(2, 20);
-    expect(s.startsWith("11.00100100001111110110")).toBe(true);
+    // π = 11.00100100001111110110101010001000100001…₂
+    const s = piInBase(2, 40);
+    expect(s.startsWith("11.00100100001111110110101010001000100001")).toBe(true);
+  });
+
+  it("converts to ternary with known prefix", () => {
+    // π = 10.01021101222201021100211111022122222…₃
+    const s = piInBase(3, 35);
+    expect(s.startsWith("10.01021101222201021100211111022122222")).toBe(true);
   });
 
   it("converts to hex with known prefix", () => {
-    // π ≈ 3.243F6A8885A3…₁₆
-    const s = piInBase(16, 12).toLowerCase();
-    expect(s.startsWith("3.243f6a8885a3")).toBe(true);
+    // π = 3.243F6A8885A308D313198A2E03707344…₁₆
+    const s = piInBase(16, 32).toLowerCase();
+    expect(s.startsWith("3.243f6a8885a308d313198a2e03707344")).toBe(true);
   });
 
   it("rejects invalid bases", () => {

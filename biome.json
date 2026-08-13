@@ -10,9 +10,11 @@
     "includes": [
       "**",
       "!**/dist",
+      "!**/dev-dist",
       "!**/node_modules",
       "!**/locales/**/*.js",
       "!**/src/data/pi-digits.ts",
+      "!**/src/data/pi-seed.ts",
       "!**/src/data/quips.ts"
     ]
   },

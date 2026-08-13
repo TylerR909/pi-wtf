@@ -3,6 +3,7 @@ node_modules
 
 # Build
 dist
+dev-dist
 dist-ssr
 *.local
 
@@ -45,6 +46,9 @@ locales/**/*.js
 locales/**/*.mjs
 locales/**/*.ts
 !locales/**/*.d.ts
+
+# Wrangler
+.wrangler
 
 # Misc
 .cache

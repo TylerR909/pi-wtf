@@ -3,11 +3,12 @@ import { PI_DIGITS } from "../data/pi-digits";
 const DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 /**
- * Convert the fractional expansion of π from decimal digits into another base.
- * Uses long-multiplication style arithmetic on the known decimal expansion so
- * we stay accurate for thousands of digits without floating-point loss.
+ * True base-b expansion of the *value* π (∑ d_k b^k), not a digit-by-digit
+ * remapping of 3.14159… (that would be BCD).
  *
- * Returns a string like "11.001001000011..." for base 2 (integer part + frac).
+ * Integer part: divide 3 by b, remainders.
+ * Fractional part: start with {π}=π−3 and repeatedly × b; the integer part
+ * of each product is the next digit (long multiplication on the decimal frac).
  */
 export function piInBase(base: number, fracDigits: number): string {
   if (!Number.isInteger(base) || base < 2 || base > 36) {
@@ -15,25 +16,15 @@ export function piInBase(base: number, fracDigits: number): string {
   }
   if (fracDigits < 0) throw new Error("fracDigits must be >= 0");
 
-  // Integer part of π is 3 in every base we care about for display purposes
-  // (3 < base for base >= 4; for base 2 and 3 we convert 3 properly).
   const intPart = convertInteger(3, base);
-
   if (fracDigits === 0) return intPart;
 
-  // Fractional decimal digits as array of 0–9
-  const decFrac = PI_DIGITS.slice(1); // drop leading "3"
-  // Work with enough decimal digits for the requested base digits
-  // log10(base) digits of decimal ≈ 1 base digit
-  const need = Math.ceil(fracDigits * Math.log10(base)) + 8;
-  const digits = decFrac
-    .slice(0, Math.min(decFrac.length, need))
-    .split("")
-    .map((c) => c.charCodeAt(0) - 48);
+  // Enough decimal places of {π} so the last output digit is stable.
+  const need = Math.ceil(fracDigits * Math.log10(base)) + 16;
+  const decFrac = PI_DIGITS.slice(1, 1 + Math.min(PI_DIGITS.length - 1, need));
+  const work = decFrac.split("").map((c) => c.charCodeAt(0) - 48);
 
-  // Multiply-by-base repeatedly on the fractional decimal array
   const out: string[] = [];
-  const work = digits.slice();
   for (let i = 0; i < fracDigits; i++) {
     let carry = 0;
     for (let j = work.length - 1; j >= 0; j--) {
@@ -60,6 +51,7 @@ function convertInteger(n: number, base: number): string {
 
 export const BASE_PRESETS = [
   { base: 2, label: "Binary" },
+  { base: 3, label: "Ternary" },
   { base: 8, label: "Octal" },
   { base: 10, label: "Decimal" },
   { base: 12, label: "Dozenal" },
