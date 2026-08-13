@@ -1,6 +1,7 @@
 import { msg } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { type RefObject, useCallback, useEffect, useState } from "react";
+import { isFullscreenNow, subscribeFullscreen, toggleFullscreen } from "../utils/fullscreen";
 
 interface Props {
   /** Defaults to the document element so the whole app (header included) goes FS. */
@@ -15,22 +16,13 @@ export function FullscreenButton({ targetRef, className = "", iconOnly = false }
   const [on, setOn] = useState(false);
 
   useEffect(() => {
-    const sync = () => setOn(Boolean(document.fullscreenElement));
-    document.addEventListener("fullscreenchange", sync);
-    return () => document.removeEventListener("fullscreenchange", sync);
+    const sync = () => setOn(isFullscreenNow());
+    sync();
+    return subscribeFullscreen(sync);
   }, []);
 
-  const toggle = useCallback(async () => {
-    try {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      } else {
-        const el = targetRef?.current ?? document.documentElement;
-        await el.requestFullscreen();
-      }
-    } catch {
-      /* denied */
-    }
+  const toggle = useCallback(() => {
+    void toggleFullscreen(targetRef?.current);
   }, [targetRef]);
 
   return (

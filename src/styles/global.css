@@ -90,6 +90,7 @@ html,
 body,
 #root {
   height: 100%;
+  min-height: 100dvh;
   margin: 0;
 }
 
@@ -401,15 +402,52 @@ a {
   opacity: 0;
   pointer-events: none;
 }
-.theme-picker select,
 .locale-picker select {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 0.3rem 0.5rem;
+  padding: 0 0.5rem;
   font-size: 0.75rem;
   color: var(--fg-muted);
   max-width: 9.5rem;
+  height: 1.85rem;
+}
+.theme-stepper {
+  display: flex;
+  align-items: stretch;
+  height: 1.85rem;
+  border-radius: 8px;
+}
+.theme-stepper .stepper-btn {
+  padding: 0;
+  width: 1.85rem;
+  flex: 0 0 1.85rem;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+.theme-stepper label {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+}
+.theme-stepper select {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 6.75rem;
+  max-width: 9.5rem;
+  margin: 0;
+  padding: 0 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 0;
+  appearance: none;
+  text-align: center;
+  text-align-last: center;
 }
 
 .stage {
@@ -553,7 +591,10 @@ a {
   align-items: stretch;
   overflow-x: hidden;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+}
+/* iOS: a scrolled overflow box eats long-press. Freeze scroll so select can start. */
+.pi-mode.is-selecting {
+  overflow-y: hidden;
 }
 .pi-probe {
   position: absolute;
@@ -582,8 +623,15 @@ a {
   overflow: visible;
   width: 100%;
   min-height: 100%;
+  -webkit-user-select: text;
   user-select: text;
+  -webkit-touch-callout: default;
   font-variant-numeric: tabular-nums;
+}
+.pi-hi,
+.pi-rest {
+  -webkit-user-select: text;
+  user-select: text;
 }
 .pi-hi {
   color: var(--accent);
@@ -709,11 +757,16 @@ a {
 .trainer-score {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  justify-content: center;
+  align-content: flex-start;
+  column-gap: 0.75rem;
+  row-gap: 0.15rem;
+  /* Two lines reserved so Reset wrapping doesn't shove the cards. */
+  min-height: 2.55em;
+  line-height: 1.2;
   font-size: 0.85rem;
   color: var(--fg-muted);
   font-family: var(--font-mono);
-  justify-content: center;
 }
 .trainer-score .linkish {
   color: var(--accent-dim);
@@ -729,6 +782,8 @@ a {
   gap: clamp(1rem, 4vw, 3rem);
   align-items: center;
   width: min(920px, 100%);
+  touch-action: pan-y;
+  user-select: none;
 }
 .trainer-mode.is-focused .trainer-chrome {
   opacity: 0;
@@ -1045,6 +1100,8 @@ a {
   overflow: auto;
   position: relative;
   padding: 0.85rem 1rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   /* Fixed dark well + bright phosphor. Theme --bg/--correct are often
      mid-tone pastels (Celestia) or dark greens (Pokéball) — mixing them
      here made the stream the same luminance as the field. */
@@ -1116,17 +1173,6 @@ html[data-theme="celestia"] .pi-hi::selection {
   color: inherit;
   text-shadow: none;
   -webkit-text-fill-color: currentColor;
-}
-.hacker-ghost {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  border: 0;
-  padding: 0;
-  bottom: 0.5rem;
-  left: 0.5rem;
-  pointer-events: none;
 }
 .app.is-fs .hacker-mode {
   padding: 0;
@@ -1441,6 +1487,7 @@ html[data-theme="celestia"] .pi-hi::selection {
   color: var(--fg-faint);
 }
 @media (pointer: coarse) {
+  .trainer-board,
   .quiz-swipe {
     touch-action: none;
   }
@@ -1584,7 +1631,7 @@ html[data-theme="celestia"] .pi-hi::selection {
     column-gap: 0.4rem;
     row-gap: 0;
     align-items: center;
-    padding: max(0.5rem, env(safe-area-inset-top)) 0.65rem 0.45rem;
+    padding: calc(env(safe-area-inset-top, 0px) + 0.55rem) 0.65rem 0.4rem;
   }
   .brand,
   .brand[data-visible="0"] {
@@ -1677,7 +1724,7 @@ html[data-theme="celestia"] .pi-hi::selection {
   .chrome-bottom {
     display: flex;
     justify-content: center;
-    padding: 0.15rem 0.75rem calc(0.25rem + env(safe-area-inset-bottom));
+    padding: 0.1rem 0.75rem 0.4rem;
   }
   .chrome-bottom.is-drawer.is-hidden {
     opacity: 0;
@@ -1735,12 +1782,25 @@ html[data-theme="celestia"] .pi-hi::selection {
   .locale-picker {
     min-width: 0;
   }
-  .theme-picker select,
   .locale-picker select {
     width: 100%;
     max-width: none;
     font-size: 16px;
-    padding: 0.5rem 0.55rem;
+    padding: 0 0.55rem;
+    height: 2.5rem;
+  }
+  .theme-stepper {
+    width: 100%;
+    height: 2.5rem;
+  }
+  .theme-stepper .stepper-btn {
+    width: 2.5rem;
+    flex-basis: 2.5rem;
+  }
+  .theme-stepper select {
+    max-width: none;
+    font-size: 16px;
+    padding: 0 0.55rem;
   }
   .site-footer {
     grid-column: auto;

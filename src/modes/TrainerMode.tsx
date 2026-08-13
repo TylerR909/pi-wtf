@@ -2,6 +2,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PI_DIGIT_COUNT, PI_DIGITS } from "../data/pi-digits";
+import { useSwipe } from "../hooks/useSwipe";
 import { beginMode, reportProgress } from "../progress";
 import { blurActive, isTypingTarget } from "../utils/keys";
 import { formatOrdinalWord } from "../utils/ordinal";
@@ -200,6 +201,13 @@ export function TrainerMode() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [answer, controls, gameOver, hardReset, resetRun]);
+
+  useSwipe(
+    boardRef,
+    () => answer(controls === "classic" ? "left" : "right"),
+    () => answer(controls === "classic" ? "right" : "left"),
+    !gameOver,
+  );
 
   const setDiff = (d: Difficulty) => {
     setDifficulty(d);

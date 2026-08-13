@@ -235,7 +235,7 @@ export function ChaosMode() {
           <Trans>Matrix, but it&apos;s just π. You&apos;re welcome.</Trans>
         </p>
       )}
-      {isFullscreen && narrow && (
+      {narrow && (
         <p className={`mode-hint chaos-hint chaos-shake-hint ${chromeOn ? "" : "is-hidden"}`}>
           <Trans>Shake to change theme</Trans>
         </p>

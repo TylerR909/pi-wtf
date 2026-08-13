@@ -49,6 +49,55 @@ function convertInteger(n: number, base: number): string {
   return parts.reverse().join("");
 }
 
+/** Standard Roman for a positive integer. 0 is N (nulla). Caps at 3999. */
+export function toRoman(n: number): string {
+  if (!Number.isInteger(n) || n < 0 || n > 3999) {
+    throw new Error(`Roman range is 0–3999, got ${n}`);
+  }
+  if (n === 0) return "N";
+  const table: [number, string][] = [
+    [1000, "M"],
+    [900, "CM"],
+    [500, "D"],
+    [400, "CD"],
+    [100, "C"],
+    [90, "XC"],
+    [50, "L"],
+    [40, "XL"],
+    [10, "X"],
+    [9, "IX"],
+    [5, "V"],
+    [4, "IV"],
+    [1, "I"],
+  ];
+  let x = n;
+  let out = "";
+  for (const [v, s] of table) {
+    while (x >= v) {
+      out += s;
+      x -= v;
+    }
+  }
+  return out;
+}
+
+const ROMAN_DIGIT = ["N", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"] as const;
+
+/**
+ * Not a real base. Integer 3 → III; each fractional decimal digit is I–IX
+ * (N for 0), smashed together. Unreadable on purpose.
+ */
+export function piInRoman(fracDigits: number): string {
+  if (fracDigits < 0) throw new Error("fracDigits must be >= 0");
+  if (fracDigits === 0) return "III";
+  const frac = PI_DIGITS.slice(1, 1 + Math.min(PI_DIGITS.length - 1, fracDigits));
+  const parts: string[] = ["III"];
+  for (const ch of frac) {
+    parts.push(ROMAN_DIGIT[ch.charCodeAt(0) - 48] ?? "?");
+  }
+  return parts.join("");
+}
+
 export const BASE_PRESETS = [
   { base: 2, label: "Binary" },
   { base: 3, label: "Ternary" },

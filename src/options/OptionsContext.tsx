@@ -11,6 +11,7 @@ import {
 import { FontSizeControl, type FontSizeId, fontSizePx } from "../components/FontSizeControl";
 import { FullscreenButton } from "../components/FullscreenButton";
 import { useNarrow } from "../hooks/useNarrow";
+import { isFullscreenNow, subscribeFullscreen, toggleFullscreen } from "../utils/fullscreen";
 import { activeSlot, replaceSlot, slotWantsFullscreen } from "./slots";
 
 export type OptionsWanted = {
@@ -107,23 +108,21 @@ export function useOptions(wanted: OptionsWanted) {
 
   useEffect(() => {
     if (!wanted.fullscreen) return;
-    const sync = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    const sync = () => setIsFullscreen(isFullscreenNow());
     sync();
-    document.addEventListener("fullscreenchange", sync);
-    if (wanted.fullscreenKey === false) {
-      return () => document.removeEventListener("fullscreenchange", sync);
-    }
+    const unsub = subscribeFullscreen(sync);
+    if (wanted.fullscreenKey === false) return unsub;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "f" && e.key !== "F") return;
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT"))
         return;
       e.preventDefault();
-      void toggleDocFullscreen();
+      void toggleFullscreen();
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener("fullscreenchange", sync);
+      unsub();
       window.removeEventListener("keydown", onKey);
     };
   }, [wanted.fullscreen, wanted.fullscreenKey]);
@@ -170,13 +169,4 @@ export function OptionsHost({
       {wantFs && <FullscreenButton className="header-fs" iconOnly={narrow} />}
     </div>
   );
-}
-
-async function toggleDocFullscreen() {
-  try {
-    if (document.fullscreenElement) await document.exitFullscreen();
-    else await document.documentElement.requestFullscreen();
-  } catch {
-    /* denied */
-  }
 }

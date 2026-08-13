@@ -4,7 +4,7 @@ import { Trans } from "@lingui/react/macro";
 import { useMemo, useState } from "react";
 import { PI_DIGITS } from "../data/pi-digits";
 import { useOptions } from "../options/OptionsContext";
-import { BASE_PRESETS, piInBase } from "../utils/base";
+import { BASE_PRESETS, piInBase, piInRoman } from "../utils/base";
 import { shuffleInPlace } from "../utils/random";
 
 const FRAC = 2400;
@@ -37,24 +37,25 @@ export function BaseMode() {
   const { _ } = useLingui();
   const [base, setBase] = useState(16);
   const [custom, setCustom] = useState("16");
-  const [wing, setWing] = useState(false);
+  const [special, setSpecial] = useState<null | "wing" | "roman">(null);
   const [glyphs, setGlyphs] = useState<readonly string[]>(() => [...WING]);
 
   const expansion = useMemo(() => {
-    if (wing) return piWingdings(FRAC, glyphs);
+    if (special === "wing") return piWingdings(FRAC, glyphs);
+    if (special === "roman") return piInRoman(FRAC);
     try {
       return piInBase(base, FRAC);
     } catch {
       return "???";
     }
-  }, [base, wing, glyphs]);
+  }, [base, special, glyphs]);
 
   const applyCustom = (raw: string) => {
     setCustom(raw);
     const n = Number.parseInt(raw, 10);
     if (Number.isFinite(n) && n >= 2 && n <= 36) {
       setBase(n);
-      setWing(false);
+      setSpecial(null);
     }
   };
 
@@ -62,7 +63,7 @@ export function BaseMode() {
     const next = Math.min(36, Math.max(2, base + dir));
     setBase(next);
     setCustom(String(next));
-    setWing(false);
+    setSpecial(null);
   };
 
   return (
@@ -72,11 +73,11 @@ export function BaseMode() {
           <button
             key={p.base}
             type="button"
-            className={!wing && base === p.base ? "active" : ""}
+            className={special == null && base === p.base ? "active" : ""}
             onClick={() => {
               setBase(p.base);
               setCustom(String(p.base));
-              setWing(false);
+              setSpecial(null);
             }}
           >
             {_(BASE_LABELS[p.base] ?? msg`Base ${p.base}`)}
@@ -84,9 +85,16 @@ export function BaseMode() {
         ))}
         <button
           type="button"
-          className={wing ? "active" : ""}
+          className={special === "roman" ? "active" : ""}
+          onClick={() => setSpecial("roman")}
+        >
+          <Trans>Roman</Trans>
+        </button>
+        <button
+          type="button"
+          className={special === "wing" ? "active" : ""}
           onClick={() => {
-            setWing(true);
+            setSpecial("wing");
             setGlyphs(shuffleInPlace([...WING]));
           }}
         >
@@ -97,7 +105,7 @@ export function BaseMode() {
             type="button"
             className="stepper-btn"
             aria-label={_(msg`Previous base`)}
-            disabled={!wing && base <= 2}
+            disabled={special == null && base <= 2}
             onClick={() => step(-1)}
           >
             ←
@@ -119,7 +127,7 @@ export function BaseMode() {
             type="button"
             className="stepper-btn"
             aria-label={_(msg`Next base`)}
-            disabled={!wing && base >= 36}
+            disabled={special == null && base >= 36}
             onClick={() => step(1)}
           >
             →
@@ -128,13 +136,19 @@ export function BaseMode() {
       </div>
 
       <p className="base-label">
-        {wing ? <Trans>π in Wingdings (not a real base)</Trans> : <Trans>π in base {base}</Trans>}
+        {special === "wing" ? (
+          <Trans>π in Wingdings (not a real base)</Trans>
+        ) : special === "roman" ? (
+          <Trans>π in Roman numerals (not a real base)</Trans>
+        ) : (
+          <Trans>π in base {base}</Trans>
+        )}
       </p>
       <p className="base-quip">
         <Trans>Why? Idk buddy, you clicked the button, not me.</Trans>
       </p>
 
-      <pre className={`base-stream ${wing ? "is-wing" : ""}`}>{expansion}</pre>
+      <pre className={`base-stream ${special === "wing" ? "is-wing" : ""}`}>{expansion}</pre>
     </div>
   );
 }

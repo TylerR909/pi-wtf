@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { piInBase } from "./base";
+import { piInBase, piInRoman, toRoman } from "./base";
 
 describe("piInBase", () => {
   it("returns decimal-ish for base 10", () => {
@@ -28,5 +28,20 @@ describe("piInBase", () => {
   it("rejects invalid bases", () => {
     expect(() => piInBase(1, 10)).toThrow();
     expect(() => piInBase(37, 10)).toThrow();
+  });
+});
+
+describe("Roman", () => {
+  it("converts integers the usual way", () => {
+    expect(toRoman(0)).toBe("N");
+    expect(toRoman(3)).toBe("III");
+    expect(toRoman(4)).toBe("IV");
+    expect(toRoman(9)).toBe("IX");
+    expect(toRoman(1994)).toBe("MCMXCIV");
+  });
+
+  it("writes π as one smashed Roman soup", () => {
+    expect(piInRoman(0)).toBe("III");
+    expect(piInRoman(5)).toBe("IIIIIVIVIX");
   });
 });

@@ -214,8 +214,8 @@ msgid "Hacker"
 msgstr "Hacker"
 
 #: src/modes/HackerMode.tsx
-msgid "Hacker typer: mash keys for pi"
-msgstr "Hacker typer: machaca teclas para pi"
+msgid "Hacker typer: mash keys or tap for pi"
+msgstr "Hacker typer: machaca teclas o toca para pi"
 
 #: src/modes/TrainerMode.tsx
 msgid "Hardcore"
@@ -278,6 +278,10 @@ msgstr "Base siguiente"
 msgid "Next mode"
 msgstr "Modo siguiente"
 
+#: src/components/ThemePicker.tsx
+msgid "Next theme"
+msgstr "Tema siguiente"
+
 #: src/components/Footer.tsx
 msgid "No warranties"
 msgstr "Sin garantías"
@@ -331,6 +335,10 @@ msgstr "Base anterior"
 msgid "Previous mode"
 msgstr "Modo anterior"
 
+#: src/components/ThemePicker.tsx
+msgid "Previous theme"
+msgstr "Tema anterior"
+
 #: src/modes/QuizMode.tsx
 msgid "Pro Mode"
 msgstr "Modo Pro"
@@ -355,6 +363,10 @@ msgstr "Reiniciar"
 #: src/modes/TrainerMode.tsx
 msgid "Right candidate {0}"
 msgstr "Candidato derecho {0}"
+
+#: src/modes/BaseMode.tsx
+msgid "Roman"
+msgstr "Romanos"
 
 #: src/modes/QuizMode.tsx
 msgid "Score"
@@ -463,6 +475,10 @@ msgstr "π en base {base}"
 #: src/components/ModeSelector.tsx
 msgid "π in binary, hex, …"
 msgstr "π en binario, hex, …"
+
+#: src/modes/BaseMode.tsx
+msgid "π in Roman numerals (not a real base)"
+msgstr "π en números romanos (no es una base real)"
 
 #: src/modes/BaseMode.tsx
 msgid "π in Wingdings (not a real base)"
