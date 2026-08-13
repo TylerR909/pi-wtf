@@ -278,6 +278,10 @@ msgstr "Base siguiente"
 msgid "Next mode"
 msgstr "Modo siguiente"
 
+#: src/components/ThemePicker.tsx
+msgid "Next theme"
+msgstr "Tema siguiente"
+
 #: src/components/Footer.tsx
 msgid "No warranties"
 msgstr "Sin garantías"
@@ -330,6 +334,10 @@ msgstr "Base anterior"
 #: src/components/ModeSelector.tsx
 msgid "Previous mode"
 msgstr "Modo anterior"
+
+#: src/components/ThemePicker.tsx
+msgid "Previous theme"
+msgstr "Tema anterior"
 
 #: src/modes/QuizMode.tsx
 msgid "Pro Mode"
