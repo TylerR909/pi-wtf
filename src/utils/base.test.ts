@@ -40,8 +40,8 @@ describe("Roman", () => {
     expect(toRoman(1994)).toBe("MCMXCIV");
   });
 
-  it("writes π as III then one Roman token per decimal digit", () => {
+  it("writes π as one smashed Roman soup", () => {
     expect(piInRoman(0)).toBe("III");
-    expect(piInRoman(5)).toBe("III.I·IV·I·V·IX");
+    expect(piInRoman(5)).toBe("IIIIIVIVIX");
   });
 });

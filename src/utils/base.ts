@@ -85,17 +85,17 @@ const ROMAN_DIGIT = ["N", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"
 
 /**
  * Not a real base. Integer 3 → III; each fractional decimal digit is I–IX
- * (N for 0), joined with middots so VIII doesn't collide with the next token.
+ * (N for 0), smashed together. Unreadable on purpose.
  */
 export function piInRoman(fracDigits: number): string {
   if (fracDigits < 0) throw new Error("fracDigits must be >= 0");
   if (fracDigits === 0) return "III";
   const frac = PI_DIGITS.slice(1, 1 + Math.min(PI_DIGITS.length - 1, fracDigits));
-  const parts: string[] = [];
+  const parts: string[] = ["III"];
   for (const ch of frac) {
     parts.push(ROMAN_DIGIT[ch.charCodeAt(0) - 48] ?? "?");
   }
-  return `III.${parts.join("·")}`;
+  return parts.join("");
 }
 
 export const BASE_PRESETS = [
