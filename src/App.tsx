@@ -8,6 +8,7 @@ import { PiOclock } from "./components/PiOclock";
 import { useChromeVisibility } from "./hooks/useChromeVisibility";
 import { useNarrow } from "./hooks/useNarrow";
 import { useShake } from "./hooks/useShake";
+import { useWakeLock } from "./hooks/useWakeLock";
 import { activateLocale, type LocaleId, loadStoredLocale, storeLocale } from "./i18n";
 import { BaseMode } from "./modes/BaseMode";
 import { ChaosMode } from "./modes/ChaosMode";
@@ -35,6 +36,7 @@ import {
   type ThemeId,
 } from "./themes/themes";
 import { isFullscreenNow, subscribeFullscreen } from "./utils/fullscreen";
+import { shouldHoldWakeLock } from "./utils/wake-lock";
 
 const initialTheme = loadStoredThemeId();
 applyTheme(getTheme(initialTheme));
@@ -92,6 +94,8 @@ function AppChrome() {
   useShake(narrow && mode === "chaos", narrow && mode === "chaos", () => {
     setThemeId((cur) => randomThemeId(cur));
   });
+  // Screen stay-awake only. A PWA cannot run in the background.
+  useWakeLock(shouldHoldWakeLock(mode, docFs));
   const [fsExitOn, setFsExitOn] = useState(true);
 
   useEffect(() => subscribeFullscreen(() => setDocFs(isFullscreenNow())), []);
