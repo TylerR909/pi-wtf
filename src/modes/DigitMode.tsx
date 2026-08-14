@@ -274,11 +274,13 @@ export function DigitMode() {
     window.addEventListener("keyup", onKeyUp);
     window.addEventListener("blur", onBlur);
     const root = rootRef.current;
+    // Stage, not just the digit cluster — empty space below must tap too (iOS).
+    const surface = (root?.closest("#main") as HTMLElement | null) ?? root;
     const killSelect = (e: Event) => e.preventDefault();
-    root?.addEventListener("pointerdown", onPointerDown);
-    root?.addEventListener("pointerup", onPointerUp);
-    root?.addEventListener("pointercancel", onPointerUp);
-    root?.addEventListener("lostpointercapture", onPointerUp);
+    surface?.addEventListener("pointerdown", onPointerDown);
+    surface?.addEventListener("pointerup", onPointerUp);
+    surface?.addEventListener("pointercancel", onPointerUp);
+    surface?.addEventListener("lostpointercapture", onPointerUp);
     root?.addEventListener("selectstart", killSelect);
     root?.addEventListener("contextmenu", killSelect);
 
@@ -295,10 +297,10 @@ export function DigitMode() {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("blur", onBlur);
-      root?.removeEventListener("pointerdown", onPointerDown);
-      root?.removeEventListener("pointerup", onPointerUp);
-      root?.removeEventListener("pointercancel", onPointerUp);
-      root?.removeEventListener("lostpointercapture", onPointerUp);
+      surface?.removeEventListener("pointerdown", onPointerDown);
+      surface?.removeEventListener("pointerup", onPointerUp);
+      surface?.removeEventListener("pointercancel", onPointerUp);
+      surface?.removeEventListener("lostpointercapture", onPointerUp);
       root?.removeEventListener("selectstart", killSelect);
       root?.removeEventListener("contextmenu", killSelect);
     };
