@@ -21,6 +21,8 @@ import {
   HOLD_QUIP_GAP_MS,
   holdInterval,
 } from "./digit-play";
+import { createQuipQueue, mockDwellMs } from "./digit-quips";
+import { pruneRateStamps, RATE_TICK_MS, stampRatePerMin, ZOOM_SHOW_MS } from "./digit-rate";
 import { createSwitchTracker, switchCandidate } from "./digit-switch";
 
 /**
@@ -50,14 +52,13 @@ export function DigitMode() {
     let advances = 0;
     let pointerId: number | null = null;
     let pointerKind: "mouse" | "touch" | null = null;
-    let hideTimer: ReturnType<typeof setTimeout> | null = null;
     let pressAt = 0;
     let pressing = false;
     let lastDiscreteAt = 0;
     let zoomedThisHold = false;
     let zoomFade: ReturnType<typeof setTimeout> | null = null;
-    const rateStamps: number[] = [];
-    const RATE_WINDOW_MS = 5000;
+    let rateStamps: number[] = [];
+    let rateClock: ReturnType<typeof setInterval> | null = null;
 
     const paint = () => {
       const el = digitRef.current;
@@ -87,37 +88,33 @@ export function DigitMode() {
       paint();
     };
 
-    const showQuip = (text: string) => {
-      if (hideTimer) {
-        clearTimeout(hideTimer);
-        hideTimer = null;
-      }
-      const el = quipRef.current;
-      if (!el) return;
-      el.textContent = text;
-      el.dataset.show = "1";
+    const quips = createQuipQueue({
+      show: (text) => {
+        const el = quipRef.current;
+        if (!el) return;
+        el.textContent = text;
+        el.dataset.show = "1";
+      },
+      hide: () => {
+        if (quipRef.current) quipRef.current.dataset.show = "0";
+      },
+    });
+
+    const stopRateClock = () => {
+      if (rateClock == null) return;
+      clearInterval(rateClock);
+      rateClock = null;
     };
 
-    const hideQuip = () => {
-      if (hideTimer) {
-        clearTimeout(hideTimer);
-        hideTimer = null;
-      }
-      if (quipRef.current) quipRef.current.dataset.show = "0";
+    const ensureRateClock = () => {
+      if (rateClock != null) return;
+      rateClock = setInterval(() => paintRate(performance.now()), RATE_TICK_MS);
     };
 
-    const scheduleHide = (ms: number) => {
-      if (quipRef.current?.dataset.show !== "1") return;
-      if (hideTimer) clearTimeout(hideTimer);
-      hideTimer = setTimeout(hideQuip, ms);
-    };
-
-    let rateIdle: ReturnType<typeof setTimeout> | null = null;
     const paintRate = (now: number) => {
       const el = rateRef.current;
       if (!el) return;
-      const cut = now - RATE_WINDOW_MS;
-      while (rateStamps.length && rateStamps[0]! < cut) rateStamps.shift();
+      rateStamps = pruneRateStamps(rateStamps, now);
       const tapping = now - lastDiscreteAt < 800;
       const holdIv = pressing && !tapping ? holdInterval(now - pressAt) : null;
       if (holdIv != null && holdIv <= HOLD_MAX_INTERVAL) {
@@ -128,8 +125,9 @@ export function DigitMode() {
           if (zoomFade) clearTimeout(zoomFade);
           zoomFade = setTimeout(() => {
             if (rateRef.current?.textContent === "zoooom") rateRef.current.dataset.show = "0";
-          }, 700);
+          }, ZOOM_SHOW_MS);
         }
+        ensureRateClock();
         return;
       }
       zoomedThisHold = false;
@@ -140,17 +138,18 @@ export function DigitMode() {
       if (holdIv != null) {
         el.textContent = `${Math.round(60_000 / holdIv)}/min`;
         el.dataset.show = "1";
+        ensureRateClock();
         return;
       }
-      if (rateStamps.length === 0) {
+      const perMin = stampRatePerMin(rateStamps, now);
+      if (perMin === 0) {
         el.dataset.show = "0";
+        stopRateClock();
         return;
       }
-      const perMin = Math.round((rateStamps.length / RATE_WINDOW_MS) * 60_000);
       el.textContent = `${perMin}/min`;
       el.dataset.show = "1";
-      if (rateIdle) clearTimeout(rateIdle);
-      rateIdle = setTimeout(() => paintRate(performance.now()), RATE_WINDOW_MS + 40);
+      ensureRateClock();
     };
 
     const behaviorAt = (now: number): DigitQuipBehavior => {
@@ -179,28 +178,35 @@ export function DigitMode() {
         pressAt,
         pressing,
       });
+      let lockMs = 0;
       if (mock) {
-        showQuip(mock);
-        play.ack(now, clickerDwellMs(mock) + 400);
-      } else if (s.quip === "clicker") {
+        const dwell = mockDwellMs(mock);
+        quips.push(mock, dwell);
+        lockMs = dwell;
+      }
+      if (s.quip === "clicker") {
         const { text, next } = nextClickerQuip(clickerCursor, behaviorAt(now));
         clickerCursor = next;
-        showQuip(text);
-        play.ack(now, clickerDwellMs(text));
+        const dwell = clickerDwellMs(text);
+        quips.push(text, dwell);
+        lockMs = Math.max(lockMs, dwell);
       } else if (s.quip === "hold") {
         const behavior = behaviorAt(now);
         if (s.comeback) comebackQueue = takeComebacks(7, Math.random, behavior);
         const welcome = comebackQueue.shift();
         if (welcome) {
-          showQuip(welcome);
+          quips.push(welcome, HOLD_QUIP_GAP_MS);
         } else {
           const { text, next } = nextQuip(holdCursor, behavior);
           holdCursor = next;
-          showQuip(text);
+          quips.push(text, HOLD_QUIP_GAP_MS);
         }
-        play.ack(now, HOLD_QUIP_GAP_MS);
+        lockMs = Math.max(lockMs, HOLD_QUIP_GAP_MS);
       }
-      if (s.hideMs != null && !mock) scheduleHide(s.hideMs);
+      if (lockMs > 0) play.ack(now, lockMs);
+      // Hide is a suggestion. The queue will not cut a live line short.
+      if (s.hideMs === null) quips.cancelHide();
+      else if (s.hideMs != null) quips.hideIn(s.hideMs);
     };
 
     const loop = (now: number) => {
@@ -212,6 +218,7 @@ export function DigitMode() {
 
     const kick = (s: DigitStep, now: number, kind: "down" | "up") => {
       apply(s, now, kind);
+      if (kind === "up") paintRate(now);
       if (s.running && !raf) raf = requestAnimationFrame(loop);
     };
 
@@ -291,9 +298,9 @@ export function DigitMode() {
         holdQuipsEmitted: play.holdQuipsEmitted(),
       });
       cancelAnimationFrame(raf);
-      if (hideTimer) clearTimeout(hideTimer);
+      quips.dispose();
       if (zoomFade) clearTimeout(zoomFade);
-      if (rateIdle) clearTimeout(rateIdle);
+      stopRateClock();
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("blur", onBlur);

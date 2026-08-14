@@ -49,7 +49,6 @@ function makeRound(stack: string, afterIndex: number): Round {
 export function TrainerMode() {
   useHotkey({ key: "←", label: t`Pick a side` });
   useHotkey({ key: "→", label: t`Pick a side` });
-  useHotkey({ key: "R", label: t`Reset` });
   useHotkey({ key: "Backspace", label: t`Reset` });
   const [stats, setStats] = useState<TrainerStats>(() =>
     loadJson("trainer-stats", EMPTY_TRAINER_STATS),
@@ -274,12 +273,9 @@ export function TrainerMode() {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (isTypingTarget(e.target)) return;
       if (gameOver) return;
-      if (!confirmReset) {
-        if (e.key === "r" || e.key === "R") {
-          e.preventDefault();
-          e.stopPropagation();
-          setConfirmReset(true);
-        }
+      if (!confirmReset) return;
+      if (e.key === "Backspace") {
+        e.preventDefault();
         return;
       }
       e.preventDefault();

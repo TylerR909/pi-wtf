@@ -95,9 +95,14 @@ export function createDigitPlay(opts?: { holdQuipsEmitted?: boolean }) {
     return step({ quip: "clicker", hideMs: null });
   };
 
-  const enterHoldSpam = (): DigitStep => {
-    if (lane !== "hold" && holdQuipsEmitted) wantComeback = true;
+  /** Hold roast “you’re back” only after idle/restore — not clicker↔hold. */
+  const claimHold = () => {
+    if (holdQuipsEmitted && lane === "none") wantComeback = true;
     lane = "hold";
+  };
+
+  const enterHoldSpam = (): DigitStep => {
+    claimHold();
     lockQuip("hold");
     const comeback = wantComeback;
     wantComeback = false;
@@ -181,8 +186,7 @@ export function createDigitPlay(opts?: { holdQuipsEmitted?: boolean }) {
       const lastKey = keyStamps[keyStamps.length - 1] ?? 0;
       const mashIntoHold = lane === "hold" && now - lastKey < SPAM_IDLE_MS;
       if (!stayClicker && !mashIntoHold) {
-        if (holdQuipsEmitted) wantComeback = true;
-        lane = "hold";
+        claimHold();
         holdNextAt = downAt + HOLD_QUIP_WARMUP_MS;
       }
     }
