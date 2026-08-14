@@ -19,9 +19,9 @@ MonkeyType energy. hackertyper.net energy. Digit #1 is 3. `3.14` is the first th
 | **Tape** | Slow scroll with ticks at 25 / 50 / 100. |
 | **Hacker** | Mash keys (or tap the well). Digits spill. |
 | **Base** | Real π in binary, hex, dozenal, … and fake Wingdings. |
-| **Rain** | Matrix rain, but it’s only π. Shake (mobile + fullscreen) to change theme. |
+| **Rain** | Matrix rain, but it’s only π. |
 
-`R` randomizes the theme (except in Hacker). Arrow up / down cycles. Idle chrome fades on desktop; phones keep the nav.
+`R` randomizes the theme (except in Hacker). Arrow up / down cycles. Phones: shake anywhere (after a tap, so iOS can ask). Idle chrome fades on desktop; phones keep the nav.
 
 ## Dev
 

@@ -13,6 +13,7 @@ export function HackerMode() {
     fullscreenKey: false,
     themeKey: false,
     fontSize: true,
+    fontSizeKey: false,
     defaultFontSize: "m",
   });
   const streamRef = useRef<HTMLPreElement>(null);

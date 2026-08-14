@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
-import { ensureMotionPermission, motionDelta } from "../utils/motion";
+import { ensureMotionPermission, motionDelta, motionNeedsPermission } from "../utils/motion";
 
 const THRESHOLD_USER = 16;
 const THRESHOLD_GRAV = 20;
 const COOLDOWN_MS = 1400;
 
 /**
- * `arm`: Rain + phone — listen / request iOS motion on a tap (PWA or Safari).
- * `active`: actually change the theme on shake.
+ * Phone-wide shake → theme. iOS only delivers events if we add the listener
+ * *after* requestPermission() resolves granted (a tap anywhere is the gesture).
  */
 export function useShake(arm: boolean, active: boolean, onShake: () => void): void {
   const onShakeRef = useRef(onShake);
@@ -49,18 +49,14 @@ export function useShake(arm: boolean, active: boolean, onShake: () => void): vo
       window.addEventListener("devicemotion", onMotion);
     };
 
-    const onGesture = (e: Event) => {
-      if (!(e.target instanceof Element) || !e.target.closest(".fullscreen-btn, .chaos-mode")) {
-        return;
-      }
+    const onGesture = () => {
       void ensureMotionPermission().then((ok) => {
         if (ok) start();
       });
     };
 
-    // Attach now (Android / already-granted iOS). First-time iOS still needs
-    // requestPermission() inside the pointerdown below.
-    start();
+    // Android: no prompt. iOS: a pre-grant listener is often dead forever.
+    if (!motionNeedsPermission()) start();
     window.addEventListener("pointerdown", onGesture, true);
 
     return () => {

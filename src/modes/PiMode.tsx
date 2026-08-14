@@ -37,19 +37,25 @@ function tipLocale(locale: string): string {
 
 export function PiMode() {
   const { i18n } = useLingui();
-  const { fontPx } = useOptions({
+  const { fontPx, pro } = useOptions({
     fontSize: true,
     defaultFontSize: "m",
     idle: false,
+    pro: true,
   });
   const wrapRef = useRef<HTMLDivElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
   const probeRef = useRef<HTMLSpanElement>(null);
   const tipRef = useRef<HTMLDivElement>(null);
+  const ghostRef = useRef<HTMLInputElement>(null);
   const typedRef = useRef(0);
   const hiRef = useRef(0);
   const gridRef = useRef({ cols: 0, rows: 0, body: "" });
   const shownCharsRef = useRef(0);
+  const proRef = useRef(pro);
+  proRef.current = pro;
+  const paintRef = useRef<() => void>(() => {});
+  const typeRef = useRef<(key: string) => void>(() => {});
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -151,15 +157,28 @@ export function PiMode() {
           flush(inHi);
           inHi = nowHi;
         }
+        if (proRef.current && !nowHi) {
+          // Pro: stop after the highlighted prefix — rest stays off-screen.
+          break;
+        }
         buf += ch;
         seen++;
         void cols;
       }
       flush(inHi);
+      if (proRef.current) {
+        const caret = document.createElement("span");
+        caret.className = "pi-caret";
+        caret.setAttribute("aria-hidden", "true");
+        caret.textContent = "▍";
+        frag.appendChild(caret);
+      }
       const y = wrap.scrollTop;
       el.replaceChildren(frag);
       wrap.scrollTop = y;
     };
+
+    paintRef.current = paintHighlight;
 
     const liveSel = () => {
       const sel = window.getSelection();
@@ -206,17 +225,22 @@ export function PiMode() {
       return PI_DIGITS[n - 1] ?? "";
     };
 
-    const onKey = (e: KeyboardEvent) => {
-      if (isTypingTarget(e.target)) return;
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      const key = e.key;
+    const tryType = (key: string) => {
       if (key.length !== 1) return;
       const want = expected(typedRef.current);
-      if (key === want) {
-        typedRef.current += 1;
-        if (typedRef.current >= 2) reportProgress(typedRef.current - 2);
-        paintHighlight();
-      }
+      if (key !== want) return;
+      typedRef.current += 1;
+      if (typedRef.current >= 2) reportProgress(typedRef.current - 2);
+      paintHighlight();
+    };
+    typeRef.current = tryType;
+
+    const onKey = (e: KeyboardEvent) => {
+      // Ghost input uses onChange so we don't double-advance (keydown + input).
+      if (e.target === ghostRef.current) return;
+      if (isTypingTarget(e.target)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      tryType(e.key);
     };
     const onCopy = (e: ClipboardEvent) => {
       const raw = window.getSelection()?.toString();
@@ -371,17 +395,46 @@ export function PiMode() {
     };
   }, [fontPx, i18n.locale]);
 
+  useEffect(() => {
+    paintRef.current();
+    if (!pro) return;
+    const focus = () => ghostRef.current?.focus({ preventScroll: true });
+    focus();
+    const id = window.requestAnimationFrame(focus);
+    return () => cancelAnimationFrame(id);
+  }, [pro]);
+
   return (
     <div
       ref={wrapRef}
-      className="mode pi-mode"
+      className={`mode pi-mode ${pro ? "is-pro" : ""}`}
       style={{ ["--pi-fs" as string]: `${fontPx}px` }}
-      aria-label={t`Scrollable digits of pi`}
+      aria-label={pro ? t`Type the next digit of pi` : t`Scrollable digits of pi`}
+      onPointerDown={() => {
+        if (pro) ghostRef.current?.focus({ preventScroll: true });
+      }}
     >
       <span ref={probeRef} className="pi-probe" aria-hidden>
         0000000000
       </span>
       <pre ref={preRef} className="pi-stream" />
+      {pro && (
+        <input
+          ref={ghostRef}
+          className="pi-pro-input"
+          inputMode="decimal"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          aria-label={t`Next digit`}
+          onChange={(e) => {
+            const raw = e.target.value;
+            e.target.value = "";
+            if (raw) typeRef.current(raw.slice(-1));
+          }}
+        />
+      )}
       <div ref={tipRef} className="pi-sel-tip" hidden role="status" aria-live="polite" />
     </div>
   );

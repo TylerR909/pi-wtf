@@ -237,7 +237,7 @@ export function ChaosMode() {
       )}
       {narrow && (
         <p className={`mode-hint chaos-hint chaos-shake-hint ${chromeOn ? "" : "is-hidden"}`}>
-          <Trans>Shake to change theme</Trans>
+          <Trans>Shake anywhere to change theme</Trans>
         </p>
       )}
     </div>

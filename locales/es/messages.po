@@ -274,6 +274,10 @@ msgstr "Modos"
 msgid "Next base"
 msgstr "Base siguiente"
 
+#: src/modes/PiMode.tsx
+msgid "Next digit"
+msgstr "Siguiente dígito"
+
 #: src/components/ModeSelector.tsx
 msgid "Next mode"
 msgstr "Modo siguiente"
@@ -343,6 +347,10 @@ msgstr "Tema anterior"
 msgid "Pro Mode"
 msgstr "Modo Pro"
 
+#: src/components/ProToggle.tsx
+msgid "Pro: type to reveal"
+msgstr "Pro: escribe para revelar"
+
 #: src/components/ModeSelector.tsx
 msgid "Quiz"
 msgstr "Quiz"
@@ -377,8 +385,12 @@ msgid "Scrollable digits of pi"
 msgstr "Dígitos de pi con desplazamiento"
 
 #: src/modes/ChaosMode.tsx
-msgid "Shake to change theme"
-msgstr "Agita para cambiar el tema"
+msgid "Shake anywhere to change theme"
+msgstr "Agita el teléfono para cambiar el tema"
+
+#: src/components/ProToggle.tsx
+msgid "Show every digit"
+msgstr "Mostrar todos los dígitos"
 
 #: src/components/ChromeBottom.tsx
 msgid "Show footer"
@@ -436,6 +448,10 @@ msgstr "Entrenador: elige el siguiente dígito"
 #: src/modes/TrainerMode.tsx
 msgid "Try again"
 msgstr "Reintentar"
+
+#: src/modes/PiMode.tsx
+msgid "Type the next digit of pi"
+msgstr "Escribe el siguiente dígito de pi"
 
 #: src/components/ModeSelector.tsx
 msgid "Wall of digits"

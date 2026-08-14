@@ -274,6 +274,10 @@ msgstr "Modes"
 msgid "Next base"
 msgstr "Next base"
 
+#: src/modes/PiMode.tsx
+msgid "Next digit"
+msgstr "Next digit"
+
 #: src/components/ModeSelector.tsx
 msgid "Next mode"
 msgstr "Next mode"
@@ -343,6 +347,10 @@ msgstr "Previous theme"
 msgid "Pro Mode"
 msgstr "Pro Mode"
 
+#: src/components/ProToggle.tsx
+msgid "Pro: type to reveal"
+msgstr "Pro: type to reveal"
+
 #: src/components/ModeSelector.tsx
 msgid "Quiz"
 msgstr "Quiz"
@@ -377,8 +385,12 @@ msgid "Scrollable digits of pi"
 msgstr "Scrollable digits of pi"
 
 #: src/modes/ChaosMode.tsx
-msgid "Shake to change theme"
-msgstr "Shake to change theme"
+msgid "Shake anywhere to change theme"
+msgstr "Shake anywhere to change theme"
+
+#: src/components/ProToggle.tsx
+msgid "Show every digit"
+msgstr "Show every digit"
 
 #: src/components/ChromeBottom.tsx
 msgid "Show footer"
@@ -436,6 +448,10 @@ msgstr "Trainer: pick the next digit"
 #: src/modes/TrainerMode.tsx
 msgid "Try again"
 msgstr "Try again"
+
+#: src/modes/PiMode.tsx
+msgid "Type the next digit of pi"
+msgstr "Type the next digit of pi"
 
 #: src/components/ModeSelector.tsx
 msgid "Wall of digits"

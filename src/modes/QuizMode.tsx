@@ -361,8 +361,10 @@ export function QuizMode() {
         setRoast((cur) => (cur?.win ? { ...cur, out: true } : cur));
         later(() => setRoast((cur) => (cur?.out ? null : cur)), 420);
       }
+      let party = false;
       if (ok) {
         if (styleRef.current === "lr" && wrongRun.current >= 5) {
+          party = true;
           burstConfetti();
           setRoast({ text: roastFinally(wrongRun.current), win: true });
         } else if (roastRef.current && !roastRef.current.win) {
@@ -395,7 +397,7 @@ export function QuizMode() {
         ok,
         text: ok ? t`Correct! It was ${q.correct}` : t`Nope — it was ${q.correct}`,
       });
-      later(() => nextQ(), ok ? 1400 : 1100);
+      later(() => nextQ(), party ? 2800 : ok ? 1400 : 1100);
     },
     [nextQ, q.correct, q.decoy, q.leftDisplay, q.rightDisplay, later],
   );

@@ -91,7 +91,7 @@ function AppChrome() {
   const [docFs, setDocFs] = useState(() => isFullscreenNow());
   // Phones keep chrome up — idle/focus fade is a desktop “get out of the way” trick.
   const { chromeVisible } = useChromeVisibility(immersive, docFs, !idleOk || narrow);
-  useShake(narrow && mode === "chaos", narrow && mode === "chaos", () => {
+  useShake(narrow, narrow, () => {
     setThemeId((cur) => randomThemeId(cur));
   });
   // Screen stay-awake only. A PWA cannot run in the background.
@@ -106,6 +106,8 @@ function AppChrome() {
       return;
     }
     setFsExitOn(true);
+    // Phones have no mouse to revive Exit — keep it up, below the status bar.
+    if (narrow) return;
     let t = window.setTimeout(() => setFsExitOn(false), 2800);
     const onMove = () => {
       setFsExitOn(true);
@@ -117,7 +119,7 @@ function AppChrome() {
       window.clearTimeout(t);
       window.removeEventListener("mousemove", onMove);
     };
-  }, [docFs]);
+  }, [docFs, narrow]);
 
   const changeLocale = useCallback(async (id: LocaleId) => {
     await activateLocale(id);
@@ -184,7 +186,7 @@ function AppChrome() {
           </>
         )}
         <OptionsHost
-          visible={docFs ? fsExitOn : chromeVisible}
+          visible={docFs ? narrow || fsExitOn : chromeVisible}
           exitOnly={docFs}
           fontSize={!narrow}
         />

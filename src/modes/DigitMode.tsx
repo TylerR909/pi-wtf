@@ -166,10 +166,13 @@ export function DigitMode() {
     window.addEventListener("keyup", onKeyUp);
     window.addEventListener("blur", onBlur);
     const root = rootRef.current;
+    const killSelect = (e: Event) => e.preventDefault();
     root?.addEventListener("pointerdown", onPointerDown);
     root?.addEventListener("pointerup", onPointerUp);
     root?.addEventListener("pointercancel", onPointerUp);
     root?.addEventListener("lostpointercapture", onPointerUp);
+    root?.addEventListener("selectstart", killSelect);
+    root?.addEventListener("contextmenu", killSelect);
 
     return () => {
       saveDigitQuips({
@@ -186,6 +189,8 @@ export function DigitMode() {
       root?.removeEventListener("pointerup", onPointerUp);
       root?.removeEventListener("pointercancel", onPointerUp);
       root?.removeEventListener("lostpointercapture", onPointerUp);
+      root?.removeEventListener("selectstart", killSelect);
+      root?.removeEventListener("contextmenu", killSelect);
     };
   }, []);
 
