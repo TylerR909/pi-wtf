@@ -34,12 +34,13 @@ export type DigitStep = {
 
 /** Floor of the hold ramp — ~3750/min. */
 export const HOLD_MAX_INTERVAL = 16;
+/** Space hold hits that floor here, then Digit can zoooom. */
+export const HOLD_MAX_AT_MS = 2500;
 
 export function holdInterval(held: number): number | null {
   if (held < HOLD_ARM_MS) return null;
-  if (held < 1800) return 170;
-  const t = Math.min(1, (held - 1800) / 10_000);
-  return 100 - t * 84;
+  const t = Math.min(1, (held - HOLD_ARM_MS) / (HOLD_MAX_AT_MS - HOLD_ARM_MS));
+  return 170 - t * (170 - HOLD_MAX_INTERVAL);
 }
 
 export function isHoldMaxSpeed(heldMs: number): boolean {

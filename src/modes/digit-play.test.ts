@@ -5,6 +5,7 @@ import {
   CLICKER_IDLE_MS,
   createDigitPlay,
   HOLD_ARM_MS,
+  HOLD_MAX_AT_MS,
   HOLD_QUIP_WARMUP_MS,
   holdInterval,
   isHoldMaxSpeed,
@@ -34,10 +35,11 @@ describe("holdInterval", () => {
     expect(holdInterval(HOLD_ARM_MS)).toBe(170);
   });
 
-  it("floors at max turbo", () => {
-    expect(holdInterval(1800 + 10_000)).toBe(16);
-    expect(isHoldMaxSpeed(1800 + 10_000)).toBe(true);
+  it("floors at max turbo after about 2.5s", () => {
     expect(isHoldMaxSpeed(HOLD_ARM_MS)).toBe(false);
+    expect(isHoldMaxSpeed(HOLD_MAX_AT_MS - 1)).toBe(false);
+    expect(holdInterval(HOLD_MAX_AT_MS)).toBe(16);
+    expect(isHoldMaxSpeed(HOLD_MAX_AT_MS)).toBe(true);
   });
 });
 

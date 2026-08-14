@@ -138,6 +138,10 @@ msgstr ""
 msgid "best {0}"
 msgstr ""
 
+#: src/modes/TrainerMode.tsx
+msgid "best {highScore}"
+msgstr ""
+
 #: src/options/OptionsContext.tsx
 msgid "Bigger type"
 msgstr ""
@@ -156,6 +160,14 @@ msgstr ""
 
 #: src/modes/TrainerMode.tsx
 msgid "Classic / Invert"
+msgstr ""
+
+#: src/modes/TrainerMode.tsx
+msgid "Confirm"
+msgstr ""
+
+#: src/modes/TrainerMode.tsx
+msgid "Confirm reset"
 msgstr ""
 
 #: src/modes/TrainerMode.tsx
@@ -271,6 +283,10 @@ msgstr ""
 msgid "Hide this"
 msgstr ""
 
+#: src/modes/TrainerGameOverScore.tsx
+msgid "High score!"
+msgstr ""
+
 #: src/modes/QuizMode.tsx
 msgid "Hints"
 msgstr ""
@@ -314,6 +330,10 @@ msgstr ""
 
 #: src/components/ModeSelector.tsx
 msgid "Modes"
+msgstr ""
+
+#: src/modes/TrainerMode.tsx
+msgid "Nevermind"
 msgstr ""
 
 #: src/modes/BaseMode.tsx
@@ -419,8 +439,18 @@ msgstr ""
 msgid "Quiz: what digit is at position N"
 msgstr ""
 
+#: src/modes/QuizMode.tsx
+#: src/modes/TrainerMode.tsx
+msgid "R(a)ndom"
+msgstr ""
+
 #: src/components/ModeSelector.tsx
 msgid "Rain"
+msgstr ""
+
+#: src/modes/QuizMode.tsx
+#: src/modes/TrainerMode.tsx
+msgid "Random"
 msgstr ""
 
 #: src/App.tsx
@@ -441,7 +471,13 @@ msgid "Roman"
 msgstr ""
 
 #: src/modes/QuizMode.tsx
+#: src/modes/TrainerGameOverScore.tsx
+#: src/modes/TrainerMode.tsx
 msgid "Score"
+msgstr ""
+
+#: src/modes/TrainerGameOverScore.tsx
+msgid "Score {score}"
 msgstr ""
 
 #: src/modes/PiMode.tsx

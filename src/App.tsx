@@ -6,8 +6,10 @@ import { ChromeBottom } from "./components/ChromeBottom";
 import { MODES, ModeSelector } from "./components/ModeSelector";
 import { PiOclock } from "./components/PiOclock";
 import { useChromeVisibility } from "./hooks/useChromeVisibility";
+import { useDevtoolsQuip } from "./hooks/useDevtoolsQuip";
 import { useNarrow } from "./hooks/useNarrow";
 import { useShake } from "./hooks/useShake";
+import { useTabPresence } from "./hooks/useTabPresence";
 import { useWakeLock } from "./hooks/useWakeLock";
 import { HotkeyProvider, useHotkey } from "./hotkeys/HotkeyContext";
 import { activateLocale, type LocaleId, loadStoredLocale, storeLocale } from "./i18n";
@@ -79,6 +81,8 @@ function AppChrome() {
   const { _, i18n } = useLingui();
   const idleOk = useIdleChrome();
   const themeHotkey = useThemeHotkey();
+  useTabPresence();
+  useDevtoolsQuip();
   const [mode, setMode] = useState<ModeId>("digit");
   const [themeId, setThemeId] = useState<ThemeId>(initialTheme);
 

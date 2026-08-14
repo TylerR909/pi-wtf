@@ -3,11 +3,25 @@ import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useRef } from "react";
 import { PI_DIGIT_COUNT, PI_DIGITS } from "../data/pi-digits";
-import { clickerDwellMs, nextClickerQuip, nextQuip, takeComebacks } from "../data/quips";
+import {
+  clickerDwellMs,
+  type DigitQuipBehavior,
+  nextClickerQuip,
+  nextQuip,
+  takeComebacks,
+} from "../data/quips";
 import { useHotkey } from "../hotkeys/HotkeyContext";
 import { beginMode, getDigitQuips, getProgress, reportProgress, saveDigitQuips } from "../progress";
 import { isTypingTarget } from "../utils/keys";
-import { createDigitPlay, type DigitStep, HOLD_QUIP_GAP_MS, isHoldMaxSpeed } from "./digit-play";
+import {
+  createDigitPlay,
+  type DigitStep,
+  HOLD_ARM_MS,
+  HOLD_MAX_INTERVAL,
+  HOLD_QUIP_GAP_MS,
+  holdInterval,
+} from "./digit-play";
+import { createSwitchTracker, switchCandidate } from "./digit-switch";
 
 /**
  * Giant one-digit-at-a-time.
@@ -32,9 +46,10 @@ export function DigitMode() {
     let holdCursor = saved.holdCursor;
     let clickerCursor = saved.clickerCursor;
     let comebackQueue: string[] = [];
+    const switcher = createSwitchTracker();
     let advances = 0;
     let pointerId: number | null = null;
-    let pointerHold = false;
+    let pointerKind: "mouse" | "touch" | null = null;
     let hideTimer: ReturnType<typeof setTimeout> | null = null;
     let pressAt = 0;
     let pressing = false;
@@ -104,8 +119,8 @@ export function DigitMode() {
       const cut = now - RATE_WINDOW_MS;
       while (rateStamps.length && rateStamps[0]! < cut) rateStamps.shift();
       const tapping = now - lastDiscreteAt < 800;
-      const holdMax = pressing && isHoldMaxSpeed(now - pressAt);
-      if (holdMax && !tapping) {
+      const holdIv = pressing && !tapping ? holdInterval(now - pressAt) : null;
+      if (holdIv != null && holdIv <= HOLD_MAX_INTERVAL) {
         if (!zoomedThisHold) {
           zoomedThisHold = true;
           el.textContent = "zoooom";
@@ -122,6 +137,11 @@ export function DigitMode() {
         clearTimeout(zoomFade);
         zoomFade = null;
       }
+      if (holdIv != null) {
+        el.textContent = `${Math.round(60_000 / holdIv)}/min`;
+        el.dataset.show = "1";
+        return;
+      }
       if (rateStamps.length === 0) {
         el.dataset.show = "0";
         return;
@@ -133,6 +153,13 @@ export function DigitMode() {
       rateIdle = setTimeout(() => paintRate(performance.now()), RATE_WINDOW_MS + 40);
     };
 
+    const behaviorAt = (now: number): DigitQuipBehavior => {
+      const holding = pressing && now - pressAt >= HOLD_ARM_MS;
+      if (pointerKind === "touch") return holding ? "pointer-hold" : "tap";
+      if (pointerKind === "mouse") return holding ? "pointer-hold" : "click";
+      return holding ? "space-hold" : "spam";
+    };
+
     const apply = (s: DigitStep, now: number, kind: "down" | "tick" | "up") => {
       if (s.advance) {
         advanceOnce();
@@ -140,30 +167,46 @@ export function DigitMode() {
         if (kind === "down") lastDiscreteAt = now;
         paintRate(now);
       }
-      if (s.quip === "clicker") {
-        const { text, next } = nextClickerQuip(clickerCursor, pointerHold);
+      const mock = switcher.observe({
+        behavior: switchCandidate({
+          kind,
+          now,
+          pressAt,
+          pressing,
+          pointerKind,
+        }),
+        now,
+        pressAt,
+        pressing,
+      });
+      if (mock) {
+        showQuip(mock);
+        play.ack(now, clickerDwellMs(mock) + 400);
+      } else if (s.quip === "clicker") {
+        const { text, next } = nextClickerQuip(clickerCursor, behaviorAt(now));
         clickerCursor = next;
         showQuip(text);
         play.ack(now, clickerDwellMs(text));
       } else if (s.quip === "hold") {
-        if (s.comeback) comebackQueue = takeComebacks(7);
+        const behavior = behaviorAt(now);
+        if (s.comeback) comebackQueue = takeComebacks(7, Math.random, behavior);
         const welcome = comebackQueue.shift();
         if (welcome) {
           showQuip(welcome);
         } else {
-          const { text, next } = nextQuip(holdCursor, pointerHold);
+          const { text, next } = nextQuip(holdCursor, behavior);
           holdCursor = next;
           showQuip(text);
         }
         play.ack(now, HOLD_QUIP_GAP_MS);
       }
-      if (s.hideMs != null) scheduleHide(s.hideMs);
+      if (s.hideMs != null && !mock) scheduleHide(s.hideMs);
     };
 
     const loop = (now: number) => {
       const s = play.tick(now);
       apply(s, now, "tick");
-      if (!s.advance && pressing && isHoldMaxSpeed(now - pressAt)) paintRate(now);
+      if (!s.advance && pressing && holdInterval(now - pressAt) != null) paintRate(now);
       raf = s.running ? requestAnimationFrame(loop) : 0;
     };
 
@@ -181,7 +224,7 @@ export function DigitMode() {
       }
       e.preventDefault();
       if (e.repeat) return;
-      pointerHold = false;
+      pointerKind = null;
       const now = performance.now();
       pressing = true;
       pressAt = now;
@@ -201,7 +244,7 @@ export function DigitMode() {
       if (isTypingTarget(e.target)) return;
       e.preventDefault();
       pointerId = e.pointerId;
-      pointerHold = true;
+      pointerKind = e.pointerType === "touch" || e.pointerType === "pen" ? "touch" : "mouse";
       (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
       const now = performance.now();
       pressing = true;

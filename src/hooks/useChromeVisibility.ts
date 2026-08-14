@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const IDLE_MS = 2800;
-const PLAY_HIDE_MS = 900;
+const IDLE_MS = 3900;
+const PLAY_HIDE_MS = 2100;
 
 function isChromeNavKey(e: KeyboardEvent): boolean {
   if (e.key === "Tab" || e.altKey || e.metaKey) return true;
@@ -12,6 +12,10 @@ function isChromeNavKey(e: KeyboardEvent): boolean {
 
 function isPlaySurface(target: EventTarget | null): boolean {
   return target instanceof Element && Boolean(target.closest("#main, .stage, .mode"));
+}
+
+export function isKeepChrome(target: EventTarget | null): boolean {
+  return target instanceof Element && Boolean(target.closest("[data-keep-chrome]"));
 }
 
 /**
@@ -30,20 +34,21 @@ export function useChromeVisibility(immersive: boolean, suppressed = false, pinn
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const forceShow = useRef(false);
   const hidingForPlay = useRef(false);
+  const holdChrome = useRef(false);
 
   const bump = useCallback(() => {
     if (suppressedRef.current) return;
     hidingForPlay.current = false;
     setVisible(true);
     if (timer.current) clearTimeout(timer.current);
-    if (forceShow.current || pinnedRef.current) return;
+    if (forceShow.current || pinnedRef.current || holdChrome.current) return;
     timer.current = setTimeout(() => {
       setVisible(false);
     }, IDLE_MS);
   }, []);
 
   const armFocusHide = useCallback(() => {
-    if (suppressedRef.current || pinnedRef.current) return;
+    if (suppressedRef.current || pinnedRef.current || holdChrome.current) return;
     if (forceShow.current) return;
     if (!visibleRef.current) return;
     if (hidingForPlay.current) return;
@@ -56,8 +61,26 @@ export function useChromeVisibility(immersive: boolean, suppressed = false, pinn
   }, []);
 
   useEffect(() => {
-    const onMove = () => bump();
+    const pinOnRandom = () => {
+      holdChrome.current = true;
+      hidingForPlay.current = false;
+      setVisible(true);
+      if (timer.current) clearTimeout(timer.current);
+    };
+
+    const onMove = (e: MouseEvent) => {
+      if (isKeepChrome(e.target)) {
+        pinOnRandom();
+        return;
+      }
+      if (holdChrome.current) holdChrome.current = false;
+      bump();
+    };
     const onMouseDown = (e: MouseEvent) => {
+      if (isKeepChrome(e.target)) {
+        pinOnRandom();
+        return;
+      }
       if (isPlaySurface(e.target)) {
         armFocusHide();
         return;
