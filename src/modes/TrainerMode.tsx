@@ -3,7 +3,8 @@ import { Trans } from "@lingui/react/macro";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PI_DIGIT_COUNT, PI_DIGITS } from "../data/pi-digits";
 import { useSwipe } from "../hooks/useSwipe";
-import { beginMode, reportProgress } from "../progress";
+import { useHotkey } from "../hotkeys/HotkeyContext";
+import { beginMode, reportProgress, rewindProgress } from "../progress";
 import { blurActive, isTypingTarget } from "../utils/keys";
 import { formatOrdinalWord } from "../utils/ordinal";
 import { wrongDigit } from "../utils/random";
@@ -36,6 +37,10 @@ function makeRound(stack: string, afterIndex: number): Round {
 }
 
 export function TrainerMode() {
+  useHotkey({ key: "←", label: t`Pick a side` });
+  useHotkey({ key: "→", label: t`Pick a side` });
+  useHotkey({ key: "Backspace", label: t`Reset` });
+  useHotkey({ key: "Space", label: t`Try again` });
   const [stats, setStats] = useState<TrainerStats>(() =>
     loadJson("trainer-stats", EMPTY_TRAINER_STATS),
   );
@@ -95,6 +100,7 @@ export function TrainerMode() {
       el.classList.remove("hit-ok", "hit-no");
     }
     setRound(makeRound("3.", 0));
+    rewindProgress(0);
   }, []);
 
   const hardReset = useCallback(() => {
@@ -196,11 +202,17 @@ export function TrainerMode() {
           // Invert: → pulls left digit onto stack; ← pulls right digit onto stack
           answer(e.key === "ArrowRight" ? "left" : "right");
         }
+        return;
+      }
+      if (e.key >= "0" && e.key <= "9") {
+        e.preventDefault();
+        if (e.key === round.left) answer("left");
+        else if (e.key === round.right) answer("right");
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [answer, controls, gameOver, hardReset, resetRun]);
+  }, [answer, controls, gameOver, hardReset, resetRun, round.left, round.right]);
 
   useSwipe(
     boardRef,
@@ -210,15 +222,44 @@ export function TrainerMode() {
   );
 
   const setDiff = (d: Difficulty) => {
+    if (d === difficulty) return;
     setDifficulty(d);
     saveJson("trainer-diff", d);
-    resetRun();
+    if (d === "endless" && gameOver) {
+      locked.current = false;
+      setGameOver(false);
+      setFlash(null);
+    }
   };
 
   const setCtrl = (c: ControlMode) => {
+    if (c === controls) return;
     setControls(c);
     saveJson("trainer-controls", c);
   };
+
+  const toggleDiff = () => setDiff(difficulty === "endless" ? "hardcore" : "endless");
+
+  useHotkey({
+    key: "E",
+    label: t`Endless / Hardcore`,
+    onPress: toggleDiff,
+  });
+  useHotkey({
+    key: "H",
+    label: t`Endless / Hardcore`,
+    onPress: toggleDiff,
+  });
+  useHotkey({
+    key: "C",
+    label: t`Classic / Invert`,
+    onPress: () => setCtrl(controls === "classic" ? "invert" : "classic"),
+  });
+  useHotkey({
+    key: "I",
+    label: t`Classic / Invert`,
+    onPress: () => setCtrl(controls === "classic" ? "invert" : "classic"),
+  });
 
   return (
     <div
@@ -336,7 +377,7 @@ export function TrainerMode() {
             <Trans>Streak died at {diedAt === 0 ? "zero" : diedAt}.</Trans>
           </p>
           <button type="button" className="btn" onClick={resetRun}>
-            <Trans>Try again</Trans> <kbd>Space</kbd>
+            <Trans>Try again</Trans>
           </button>
         </div>
       )}

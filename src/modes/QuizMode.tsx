@@ -5,6 +5,7 @@ import { burstConfetti } from "../components/PiOclock";
 import { PI_DIGIT_COUNT, PI_DIGITS } from "../data/pi-digits";
 import { useNarrow } from "../hooks/useNarrow";
 import { useSwipe } from "../hooks/useSwipe";
+import { useHotkey } from "../hotkeys/HotkeyContext";
 import { formatOrdinal } from "../utils/ordinal";
 import { pickOne, randInt, shuffleInPlace, wrongDigit } from "../utils/random";
 
@@ -290,6 +291,8 @@ export function QuizMode() {
   narrowRef.current = narrow;
   const [style, setStyle] = useState<QuizStyle>("lr");
   const [hintsOn, setHintsOn] = useState(false);
+  useHotkey({ key: "←", label: t`Pick a side`, enabled: style === "lr" });
+  useHotkey({ key: "→", label: t`Pick a side`, enabled: style === "lr" });
   const [q, setQ] = useState<Question>(() => {
     quizSerial = 0;
     return makeQuestion("lr");
@@ -450,6 +453,19 @@ export function QuizMode() {
     styleRef.current = s;
     nextQ(s);
   };
+
+  useHotkey({
+    key: "P",
+    label: t`50/50 / Pro`,
+    ignoreTyping: false,
+    onPress: () => changeStyle(styleRef.current === "lr" ? "input" : "lr"),
+  });
+  useHotkey({
+    key: "H",
+    label: t`Hints`,
+    ignoreTyping: false,
+    onPress: () => setHintsOn((v) => !v),
+  });
 
   return (
     <div

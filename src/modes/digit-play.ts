@@ -32,11 +32,19 @@ export type DigitStep = {
   running: boolean;
 };
 
+/** Floor of the hold ramp — ~3750/min. */
+export const HOLD_MAX_INTERVAL = 16;
+
 export function holdInterval(held: number): number | null {
   if (held < HOLD_ARM_MS) return null;
   if (held < 1800) return 170;
   const t = Math.min(1, (held - 1800) / 10_000);
   return 100 - t * 84;
+}
+
+export function isHoldMaxSpeed(heldMs: number): boolean {
+  const iv = holdInterval(heldMs);
+  return iv != null && iv <= HOLD_MAX_INTERVAL;
 }
 
 export function tapRate(

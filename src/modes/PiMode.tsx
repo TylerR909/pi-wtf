@@ -3,6 +3,7 @@ import { t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { useEffect, useRef } from "react";
 import { PI_DIGITS, piLength, piSlice, subscribePi } from "../data/pi-digits";
+import { useHotkey } from "../hotkeys/HotkeyContext";
 import { useOptions } from "../options/OptionsContext";
 import { getProgress, reportProgress, subscribeProgress } from "../progress";
 import { isTypingTarget } from "../utils/keys";
@@ -37,12 +38,19 @@ function tipLocale(locale: string): string {
 
 export function PiMode() {
   const { i18n } = useLingui();
-  const { fontPx, pro } = useOptions({
+  const { fontPx, pro, setPro } = useOptions({
     fontSize: true,
     defaultFontSize: "m",
     idle: false,
     pro: true,
   });
+  useHotkey({
+    key: "P",
+    label: t`Pro`,
+    ignoreTyping: false,
+    onPress: () => setPro((v) => !v),
+  });
+  useHotkey({ key: "0–9", label: t`Type the next digit` });
   const wrapRef = useRef<HTMLDivElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
   const probeRef = useRef<HTMLSpanElement>(null);

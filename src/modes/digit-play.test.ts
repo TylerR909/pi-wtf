@@ -7,6 +7,7 @@ import {
   HOLD_ARM_MS,
   HOLD_QUIP_WARMUP_MS,
   holdInterval,
+  isHoldMaxSpeed,
   tapRate,
 } from "./digit-play";
 
@@ -31,6 +32,12 @@ describe("holdInterval", () => {
   it("does not auto-repeat until the press is a real hold", () => {
     expect(holdInterval(HOLD_ARM_MS - 1)).toBeNull();
     expect(holdInterval(HOLD_ARM_MS)).toBe(170);
+  });
+
+  it("floors at max turbo", () => {
+    expect(holdInterval(1800 + 10_000)).toBe(16);
+    expect(isHoldMaxSpeed(1800 + 10_000)).toBe(true);
+    expect(isHoldMaxSpeed(HOLD_ARM_MS)).toBe(false);
   });
 });
 

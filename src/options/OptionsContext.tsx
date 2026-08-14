@@ -1,3 +1,5 @@
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 import {
   createContext,
   type ReactNode,
@@ -17,6 +19,7 @@ import {
 import { FullscreenButton } from "../components/FullscreenButton";
 import { ProToggle } from "../components/ProToggle";
 import { useNarrow } from "../hooks/useNarrow";
+import { useHotkey } from "../hotkeys/HotkeyContext";
 import { isFullscreenNow, subscribeFullscreen, toggleFullscreen } from "../utils/fullscreen";
 import { loadJson, saveJson } from "../utils/storage";
 import { activeSlot, replaceSlot, slotWantsFullscreen } from "./slots";
@@ -103,6 +106,7 @@ export function OptionsProvider({ children }: { children: ReactNode }) {
 export function useOptions(wanted: OptionsWanted) {
   const ctx = useContext(ApiCtx);
   if (!ctx) throw new Error("useOptions requires <OptionsProvider>");
+  const { _ } = useLingui();
   const id = useId();
   const [fontSize, setFontSize] = useState<FontSizeId>(wanted.defaultFontSize ?? "m");
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -110,6 +114,38 @@ export function useOptions(wanted: OptionsWanted) {
   const idle = wanted.idle !== false;
   const themeKey = wanted.themeKey !== false;
   const pro = Boolean(wanted.pro);
+  const fsHot = Boolean(wanted.fullscreen) && wanted.fullscreenKey !== false;
+  const fontHot = Boolean(wanted.fontSize) && wanted.fontSizeKey !== false;
+
+  useHotkey({
+    key: "F",
+    label: _(msg`Fullscreen`),
+    enabled: fsHot,
+    onPress: () => {
+      void toggleFullscreen();
+    },
+  });
+  useHotkey({
+    key: "Esc",
+    label: _(msg`Exit fullscreen`),
+    enabled: Boolean(wanted.fullscreen),
+    onPress: () => {
+      // Native FS already exits on Esc. CSS fallback (iOS) needs a hand.
+      if (document.documentElement.dataset.appFs === "1") void toggleFullscreen();
+    },
+  });
+  useHotkey({
+    key: "+",
+    label: _(msg`Bigger type`),
+    enabled: fontHot,
+    onPress: () => setFontSize((cur) => cycleFontSize(cur, 1)),
+  });
+  useHotkey({
+    key: "-",
+    label: _(msg`Smaller type`),
+    enabled: fontHot,
+    onPress: () => setFontSize((cur) => cycleFontSize(cur, -1)),
+  });
 
   useEffect(() => {
     ctx.register({
@@ -136,44 +172,8 @@ export function useOptions(wanted: OptionsWanted) {
     if (!wanted.fullscreen) return;
     const sync = () => setIsFullscreen(isFullscreenNow());
     sync();
-    const unsub = subscribeFullscreen(sync);
-    if (wanted.fullscreenKey === false) return unsub;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "f" && e.key !== "F") return;
-      const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT"))
-        return;
-      e.preventDefault();
-      void toggleFullscreen();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      unsub();
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [wanted.fullscreen, wanted.fullscreenKey]);
-
-  useEffect(() => {
-    if (!wanted.fontSize || wanted.fontSizeKey === false) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      const t = e.target as HTMLElement | null;
-      if (
-        t &&
-        (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT") &&
-        !t.classList.contains("pi-pro-input")
-      ) {
-        return;
-      }
-      const plus = e.key === "+" || e.key === "=" || e.code === "NumpadAdd";
-      const minus = e.key === "-" || e.key === "_" || e.code === "NumpadSubtract";
-      if (!plus && !minus) return;
-      e.preventDefault();
-      setFontSize((cur) => cycleFontSize(cur, plus ? 1 : -1));
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [wanted.fontSize, wanted.fontSizeKey]);
+    return subscribeFullscreen(sync);
+  }, [wanted.fullscreen]);
 
   return {
     isFullscreen,

@@ -43,6 +43,11 @@ export function LocalePicker({ locale, onChange, visible }: Props) {
             onChange(e.target.value as LocaleId);
             e.currentTarget.blur();
           }}
+          onKeyDown={(e) => {
+            if (e.key !== " " && e.code !== "Space" && e.key !== "Escape") return;
+            e.preventDefault();
+            e.currentTarget.blur();
+          }}
           aria-label={_(msg`Language`)}
           title={_(msg`Language`)}
         >

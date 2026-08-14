@@ -6,12 +6,16 @@ import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PI_DIGITS } from "../data/pi-digits";
+import { useHotkey } from "../hotkeys/HotkeyContext";
 import { useOptions } from "../options/OptionsContext";
 import { beginMode, getProgress, reportProgress } from "../progress";
 import { isTypingTarget } from "../utils/keys";
 
 export function TapeMode() {
   useLingui();
+  useHotkey({ key: "←", label: t`Slower / rewind` });
+  useHotkey({ key: "→", label: t`Faster` });
+  useHotkey({ key: "Space", label: t`Pause` });
   const { isFullscreen, fontPx } = useOptions({
     fullscreen: true,
     fontSize: true,
@@ -95,6 +99,10 @@ export function TapeMode() {
     let windowChars = 200;
     let startIdx = 0;
     let x = 40;
+    /** Intro: midpoint of “3.14”. */
+    const introX = () => window.innerWidth / 2 - 2 * charW;
+    /** Rewind stop: digit #1 (the 3) on the midline — not stuck on #2. */
+    const maxX = () => window.innerWidth / 2 - charW / 2;
     let pausedUntil = 0;
     let last = performance.now();
     let raf = 0;
@@ -166,8 +174,8 @@ export function TapeMode() {
         startIdx += shift;
         x += shift * charW;
         rebuild();
-      } else if (x > 40 && startIdx > 0) {
-        const shift = Math.min(startIdx, Math.ceil((x - 40) / charW) + oneScreen);
+      } else if (x > maxX() && startIdx > 0) {
+        const shift = Math.min(startIdx, Math.ceil((x - maxX()) / charW) + oneScreen);
         startIdx = Math.max(0, startIdx - shift);
         x -= shift * charW;
         rebuild();
@@ -175,8 +183,9 @@ export function TapeMode() {
     };
 
     const clampStart = () => {
-      if (startIdx <= 0 && x > 40) {
-        x = 40;
+      const cap = maxX();
+      if (startIdx <= 0 && x > cap) {
+        x = cap;
         if (scrubVel > 0) scrubVel = 0;
       }
     };
@@ -248,6 +257,7 @@ export function TapeMode() {
     const onResize = () => {
       measure();
       rebuild();
+      clampStart();
       applyTransform();
     };
 
@@ -302,8 +312,8 @@ export function TapeMode() {
       const cruising = now >= pausedUntil;
       if (cruising) {
         x += velRef.current * dt;
-        if (startIdx <= 0 && x > 40) {
-          x = 40;
+        if (startIdx <= 0 && x > maxX()) {
+          x = maxX();
           if (velRef.current > 0) {
             velRef.current = 0;
             syncSpeedLabel();
@@ -323,21 +333,23 @@ export function TapeMode() {
       raf = requestAnimationFrame(loop);
     };
 
-    const restoreFromProgress = () => {
+    const restoreFromProgress = (): boolean => {
       const saved = getProgress();
-      if (saved <= 0) return;
+      if (saved <= 0) return false;
       // saved is 0-based into 31415… → display index (0=3, 1=., 2=1, …)
       const target = saved + 1;
       const lead = Math.ceil(window.innerWidth / charW);
       startIdx = Math.max(0, target - lead);
       x = -(target - startIdx) * charW + window.innerWidth / 2;
+      return true;
     };
 
     pokeChrome();
     measure();
-    restoreFromProgress();
+    if (!restoreFromProgress()) x = introX();
     rebuild();
     applyTransform();
+    pausedUntil = performance.now() + 2200;
     raf = requestAnimationFrame(loop);
     const root = rootRef.current;
     window.addEventListener("keydown", onKey);

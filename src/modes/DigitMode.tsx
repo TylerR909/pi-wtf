@@ -4,9 +4,10 @@ import { Trans } from "@lingui/react/macro";
 import { useEffect, useRef } from "react";
 import { PI_DIGIT_COUNT, PI_DIGITS } from "../data/pi-digits";
 import { clickerDwellMs, nextClickerQuip, nextQuip, takeComebacks } from "../data/quips";
+import { useHotkey } from "../hotkeys/HotkeyContext";
 import { beginMode, getDigitQuips, getProgress, reportProgress, saveDigitQuips } from "../progress";
 import { isTypingTarget } from "../utils/keys";
-import { createDigitPlay, type DigitStep, HOLD_QUIP_GAP_MS } from "./digit-play";
+import { createDigitPlay, type DigitStep, HOLD_QUIP_GAP_MS, isHoldMaxSpeed } from "./digit-play";
 
 /**
  * Giant one-digit-at-a-time.
@@ -14,9 +15,11 @@ import { createDigitPlay, type DigitStep, HOLD_QUIP_GAP_MS } from "./digit-play"
  */
 export function DigitMode() {
   useLingui();
+  useHotkey({ key: "Space", label: t`Next digit` });
   const rootRef = useRef<HTMLDivElement>(null);
   const digitRef = useRef<HTMLDivElement>(null);
   const metaRef = useRef<HTMLDivElement>(null);
+  const rateRef = useRef<HTMLDivElement>(null);
   const quipRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLParagraphElement>(null);
 
@@ -33,6 +36,13 @@ export function DigitMode() {
     let pointerId: number | null = null;
     let pointerHold = false;
     let hideTimer: ReturnType<typeof setTimeout> | null = null;
+    let pressAt = 0;
+    let pressing = false;
+    let lastDiscreteAt = 0;
+    let zoomedThisHold = false;
+    let zoomFade: ReturnType<typeof setTimeout> | null = null;
+    const rateStamps: number[] = [];
+    const RATE_WINDOW_MS = 5000;
 
     const paint = () => {
       const el = digitRef.current;
@@ -87,8 +97,49 @@ export function DigitMode() {
       hideTimer = setTimeout(hideQuip, ms);
     };
 
-    const apply = (s: DigitStep, now: number) => {
-      if (s.advance) advanceOnce();
+    let rateIdle: ReturnType<typeof setTimeout> | null = null;
+    const paintRate = (now: number) => {
+      const el = rateRef.current;
+      if (!el) return;
+      const cut = now - RATE_WINDOW_MS;
+      while (rateStamps.length && rateStamps[0]! < cut) rateStamps.shift();
+      const tapping = now - lastDiscreteAt < 800;
+      const holdMax = pressing && isHoldMaxSpeed(now - pressAt);
+      if (holdMax && !tapping) {
+        if (!zoomedThisHold) {
+          zoomedThisHold = true;
+          el.textContent = "zoooom";
+          el.dataset.show = "1";
+          if (zoomFade) clearTimeout(zoomFade);
+          zoomFade = setTimeout(() => {
+            if (rateRef.current?.textContent === "zoooom") rateRef.current.dataset.show = "0";
+          }, 700);
+        }
+        return;
+      }
+      zoomedThisHold = false;
+      if (zoomFade) {
+        clearTimeout(zoomFade);
+        zoomFade = null;
+      }
+      if (rateStamps.length === 0) {
+        el.dataset.show = "0";
+        return;
+      }
+      const perMin = Math.round((rateStamps.length / RATE_WINDOW_MS) * 60_000);
+      el.textContent = `${perMin}/min`;
+      el.dataset.show = "1";
+      if (rateIdle) clearTimeout(rateIdle);
+      rateIdle = setTimeout(() => paintRate(performance.now()), RATE_WINDOW_MS + 40);
+    };
+
+    const apply = (s: DigitStep, now: number, kind: "down" | "tick" | "up") => {
+      if (s.advance) {
+        advanceOnce();
+        rateStamps.push(now);
+        if (kind === "down") lastDiscreteAt = now;
+        paintRate(now);
+      }
       if (s.quip === "clicker") {
         const { text, next } = nextClickerQuip(clickerCursor, pointerHold);
         clickerCursor = next;
@@ -111,29 +162,38 @@ export function DigitMode() {
 
     const loop = (now: number) => {
       const s = play.tick(now);
-      apply(s, now);
+      apply(s, now, "tick");
+      if (!s.advance && pressing && isHoldMaxSpeed(now - pressAt)) paintRate(now);
       raf = s.running ? requestAnimationFrame(loop) : 0;
     };
 
-    const kick = (s: DigitStep, now: number) => {
-      apply(s, now);
+    const kick = (s: DigitStep, now: number, kind: "down" | "up") => {
+      apply(s, now, kind);
       if (s.running && !raf) raf = requestAnimationFrame(loop);
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code !== "Space" && e.key !== " ") return;
-      if (isTypingTarget(e.target)) return;
+      if (e.target instanceof HTMLSelectElement) {
+        e.target.blur();
+      } else if (isTypingTarget(e.target)) {
+        return;
+      }
       e.preventDefault();
       if (e.repeat) return;
       pointerHold = false;
       const now = performance.now();
-      kick(play.down("key", now), now);
+      pressing = true;
+      pressAt = now;
+      zoomedThisHold = false;
+      kick(play.down("key", now), now, "down");
     };
 
     const onKeyUp = (e: KeyboardEvent) => {
       if (e.code !== "Space" && e.key !== " ") return;
       const now = performance.now();
-      kick(play.up("key", now), now);
+      pressing = false;
+      kick(play.up("key", now), now, "up");
     };
 
     const onPointerDown = (e: PointerEvent) => {
@@ -144,20 +204,25 @@ export function DigitMode() {
       pointerHold = true;
       (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
       const now = performance.now();
-      kick(play.down("pointer", now), now);
+      pressing = true;
+      pressAt = now;
+      zoomedThisHold = false;
+      kick(play.down("pointer", now), now, "down");
     };
 
     const onPointerUp = (e: PointerEvent) => {
       if (pointerId != null && e.pointerId !== pointerId) return;
       pointerId = null;
       const now = performance.now();
-      kick(play.release(now), now);
+      pressing = false;
+      kick(play.release(now), now, "up");
     };
 
     const onBlur = () => {
       pointerId = null;
       const now = performance.now();
-      kick(play.release(now), now);
+      pressing = false;
+      kick(play.release(now), now, "up");
     };
 
     if (index > 0 && hintRef.current) hintRef.current.dataset.hide = "1";
@@ -182,6 +247,8 @@ export function DigitMode() {
       });
       cancelAnimationFrame(raf);
       if (hideTimer) clearTimeout(hideTimer);
+      if (zoomFade) clearTimeout(zoomFade);
+      if (rateIdle) clearTimeout(rateIdle);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("blur", onBlur);
@@ -206,6 +273,7 @@ export function DigitMode() {
       <div ref={metaRef} className="digit-meta">
         {t`π · digit #${1}`}
       </div>
+      <div ref={rateRef} className="digit-rate" data-show="0" />
       <div ref={quipRef} className="digit-quip" data-show="0" aria-live="polite" />
       <p ref={hintRef} className="mode-hint digit-hint" data-hide="0">
         <Trans>Press Spacebar</Trans>

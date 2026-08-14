@@ -1,8 +1,9 @@
 import { msg } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { PI_DIGITS } from "../data/pi-digits";
+import { useHotkey } from "../hotkeys/HotkeyContext";
 import { useOptions } from "../options/OptionsContext";
 import { BASE_PRESETS, piInBase, piInRoman } from "../utils/base";
 import { shuffleInPlace } from "../utils/random";
@@ -39,6 +40,8 @@ export function BaseMode() {
   const [custom, setCustom] = useState("16");
   const [special, setSpecial] = useState<null | "wing" | "roman">(null);
   const [glyphs, setGlyphs] = useState<readonly string[]>(() => [...WING]);
+  const [flashDir, setFlashDir] = useState<-1 | 1 | null>(null);
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const expansion = useMemo(() => {
     if (special === "wing") return piWingdings(FRAC, glyphs);
@@ -60,11 +63,23 @@ export function BaseMode() {
   };
 
   const step = (dir: -1 | 1) => {
-    const next = Math.min(36, Math.max(2, base + dir));
-    setBase(next);
-    setCustom(String(next));
-    setSpecial(null);
+    setBase((cur) => {
+      const next = Math.min(36, Math.max(2, cur + dir));
+      setCustom(String(next));
+      setSpecial(null);
+      return next;
+    });
+    setFlashDir(dir);
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    flashTimer.current = setTimeout(() => setFlashDir(null), 160);
+    const el = document.activeElement;
+    if (el instanceof HTMLElement && el.closest(".base-stepper")) el.blur();
   };
+
+  useHotkey({ key: "+", label: _(msg`Next base`), onPress: () => step(1) });
+  useHotkey({ key: "→", label: _(msg`Next base`), onPress: () => step(1) });
+  useHotkey({ key: "-", label: _(msg`Previous base`), onPress: () => step(-1) });
+  useHotkey({ key: "←", label: _(msg`Previous base`), onPress: () => step(-1) });
 
   return (
     <div className="mode base-mode" aria-label={_(msg`Pi in other bases`)}>
@@ -103,10 +118,13 @@ export function BaseMode() {
         <div className="stepper base-stepper">
           <button
             type="button"
-            className="stepper-btn"
+            className={`stepper-btn ${flashDir === -1 ? "is-flash" : ""}`}
             aria-label={_(msg`Previous base`)}
             disabled={special == null && base <= 2}
-            onClick={() => step(-1)}
+            onClick={(e) => {
+              step(-1);
+              e.currentTarget.blur();
+            }}
           >
             ←
           </button>
@@ -125,10 +143,13 @@ export function BaseMode() {
           />
           <button
             type="button"
-            className="stepper-btn"
+            className={`stepper-btn ${flashDir === 1 ? "is-flash" : ""}`}
             aria-label={_(msg`Next base`)}
             disabled={special == null && base >= 36}
-            onClick={() => step(1)}
+            onClick={(e) => {
+              step(1);
+              e.currentTarget.blur();
+            }}
           >
             →
           </button>

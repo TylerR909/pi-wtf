@@ -56,6 +56,10 @@ msgid "🌅 Chillwave"
 msgstr "🌅 Chillwave"
 
 #: src/components/ThemePicker.tsx
+msgid "🌌 Aurora"
+msgstr "🌌 Aurora"
+
+#: src/components/ThemePicker.tsx
 msgid "🌙 Midnight"
 msgstr "🌙 Midnight"
 
@@ -107,6 +111,10 @@ msgstr "🦄 Princess Celestia"
 msgid "50/50"
 msgstr "50/50"
 
+#: src/modes/QuizMode.tsx
+msgid "50/50 / Pro"
+msgstr "50/50 / Pro"
+
 #: src/components/ModeSelector.tsx
 msgid "a serious tool for unserious people"
 msgstr "a serious tool for unserious people"
@@ -130,6 +138,10 @@ msgstr "Base36"
 msgid "best {0}"
 msgstr "best {0}"
 
+#: src/options/OptionsContext.tsx
+msgid "Bigger type"
+msgstr "Bigger type"
+
 #: src/modes/BaseMode.tsx
 msgid "Binary"
 msgstr "Binary"
@@ -143,6 +155,10 @@ msgid "Classic"
 msgstr "Classic"
 
 #: src/modes/TrainerMode.tsx
+msgid "Classic / Invert"
+msgstr "Classic / Invert"
+
+#: src/modes/TrainerMode.tsx
 msgid "Correct"
 msgstr "Correct"
 
@@ -150,6 +166,10 @@ msgstr "Correct"
 #: src/modes/QuizMode.tsx
 msgid "Correct! It was {0}"
 msgstr "Correct! It was {0}"
+
+#: src/App.tsx
+msgid "Cycle theme"
+msgstr "Cycle theme"
 
 #: src/modes/BaseMode.tsx
 msgid "Decimal"
@@ -181,17 +201,34 @@ msgstr "Digit rain"
 msgid "Dozenal"
 msgstr "Dozenal"
 
+#: src/modes/HackerMode.tsx
+msgid "Dump a chunk"
+msgstr "Dump a chunk"
+
+#: src/modes/HackerMode.tsx
+msgid "Dump a lot"
+msgstr "Dump a lot"
+
 #: src/modes/TrainerMode.tsx
 msgid "Endless"
 msgstr "Endless"
+
+#: src/modes/TrainerMode.tsx
+msgid "Endless / Hardcore"
+msgstr "Endless / Hardcore"
 
 #: src/components/FullscreenButton.tsx
 msgid "exit"
 msgstr "exit"
 
 #: src/components/FullscreenButton.tsx
+#: src/options/OptionsContext.tsx
 msgid "Exit fullscreen"
 msgstr "Exit fullscreen"
+
+#: src/modes/TapeMode.tsx
+msgid "Faster"
+msgstr "Faster"
 
 #: src/components/FontSizeControl.tsx
 msgid "Font size"
@@ -202,6 +239,7 @@ msgid "full"
 msgstr "full"
 
 #: src/components/FullscreenButton.tsx
+#: src/options/OptionsContext.tsx
 msgid "Fullscreen"
 msgstr "Fullscreen"
 
@@ -229,9 +267,17 @@ msgstr "Hex"
 msgid "Hide footer"
 msgstr "Hide footer"
 
+#: src/hotkeys/HotkeyContext.tsx
+msgid "Hide this"
+msgstr "Hide this"
+
 #: src/modes/QuizMode.tsx
 msgid "Hints"
 msgstr "Hints"
+
+#: src/hotkeys/HotkeyContext.tsx
+msgid "Hotkeys"
+msgstr "Hotkeys"
 
 #: src/modes/TrainerMode.tsx
 msgid "Invert"
@@ -274,6 +320,7 @@ msgstr "Modes"
 msgid "Next base"
 msgstr "Next base"
 
+#: src/modes/DigitMode.tsx
 #: src/modes/PiMode.tsx
 msgid "Next digit"
 msgstr "Next digit"
@@ -312,6 +359,10 @@ msgid "One digit at a time. Press Space to advance."
 msgstr "One digit at a time. Press Space to advance."
 
 #: src/modes/TapeMode.tsx
+msgid "Pause"
+msgstr "Pause"
+
+#: src/modes/TapeMode.tsx
 msgid "paused"
 msgstr "paused"
 
@@ -322,6 +373,11 @@ msgstr "Pi"
 #: src/modes/BaseMode.tsx
 msgid "Pi in other bases"
 msgstr "Pi in other bases"
+
+#: src/modes/QuizMode.tsx
+#: src/modes/TrainerMode.tsx
+msgid "Pick a side"
+msgstr "Pick a side"
 
 #: src/modes/QuizMode.tsx
 msgid "Pick one"
@@ -343,6 +399,10 @@ msgstr "Previous mode"
 msgid "Previous theme"
 msgstr "Previous theme"
 
+#: src/modes/PiMode.tsx
+msgid "Pro"
+msgstr "Pro"
+
 #: src/modes/QuizMode.tsx
 msgid "Pro Mode"
 msgstr "Pro Mode"
@@ -362,6 +422,10 @@ msgstr "Quiz: what digit is at position N"
 #: src/components/ModeSelector.tsx
 msgid "Rain"
 msgstr "Rain"
+
+#: src/App.tsx
+msgid "Random theme"
+msgstr "Random theme"
 
 #: src/modes/TrainerMode.tsx
 msgid "Reset"
@@ -404,9 +468,21 @@ msgstr "Skip to content"
 msgid "Slow scroll + measuring tape"
 msgstr "Slow scroll + measuring tape"
 
+#: src/modes/TapeMode.tsx
+msgid "Slower / rewind"
+msgstr "Slower / rewind"
+
+#: src/options/OptionsContext.tsx
+msgid "Smaller type"
+msgstr "Smaller type"
+
 #: src/components/ModeSelector.tsx
 msgid "Spacebar one-at-a-time"
 msgstr "Spacebar one-at-a-time"
+
+#: src/modes/HackerMode.tsx
+msgid "Spill digits"
+msgstr "Spill digits"
 
 #: src/modes/TrainerMode.tsx
 msgid "Streak"
@@ -448,6 +524,10 @@ msgstr "Trainer: pick the next digit"
 #: src/modes/TrainerMode.tsx
 msgid "Try again"
 msgstr "Try again"
+
+#: src/modes/PiMode.tsx
+msgid "Type the next digit"
+msgstr "Type the next digit"
 
 #: src/modes/PiMode.tsx
 msgid "Type the next digit of pi"

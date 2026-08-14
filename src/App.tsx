@@ -9,6 +9,7 @@ import { useChromeVisibility } from "./hooks/useChromeVisibility";
 import { useNarrow } from "./hooks/useNarrow";
 import { useShake } from "./hooks/useShake";
 import { useWakeLock } from "./hooks/useWakeLock";
+import { HotkeyProvider, useHotkey } from "./hotkeys/HotkeyContext";
 import { activateLocale, type LocaleId, loadStoredLocale, storeLocale } from "./i18n";
 import { BaseMode } from "./modes/BaseMode";
 import { ChaosMode } from "./modes/ChaosMode";
@@ -67,7 +68,9 @@ function ModeStage({ mode }: { mode: ModeId }) {
 export default function App() {
   return (
     <OptionsProvider>
-      <AppChrome />
+      <HotkeyProvider>
+        <AppChrome />
+      </HotkeyProvider>
     </OptionsProvider>
   );
 }
@@ -132,27 +135,22 @@ function AppChrome() {
     setMode(id);
   }, []);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) {
-        return;
-      }
-      if ((e.key === "r" || e.key === "R") && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        // Mash-key modes (Hacker) register themeKey: false — same idea as F.
-        if (!themeHotkey || mode === "hacker") return;
-        e.preventDefault();
-        setThemeId((cur) => randomThemeId(cur));
-        return;
-      }
-      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
-      e.preventDefault();
-      const dir: 1 | -1 = e.key === "ArrowDown" ? 1 : -1;
-      setThemeId((cur) => cycleThemeId(cur, dir));
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [themeHotkey, mode]);
+  useHotkey({
+    key: "R",
+    label: _(msg`Random theme`),
+    enabled: themeHotkey && mode !== "hacker",
+    onPress: () => setThemeId((cur) => randomThemeId(cur)),
+  });
+  useHotkey({
+    key: "↑",
+    label: _(msg`Cycle theme`),
+    onPress: () => setThemeId((cur) => cycleThemeId(cur, -1)),
+  });
+  useHotkey({
+    key: "↓",
+    label: _(msg`Cycle theme`),
+    onPress: () => setThemeId((cur) => cycleThemeId(cur, 1)),
+  });
 
   return (
     <div
