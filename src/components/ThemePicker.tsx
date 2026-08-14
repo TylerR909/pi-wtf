@@ -11,6 +11,7 @@ const THEME_LABELS: Record<Exclude<ThemeId, "america">, ReturnType<typeof msg>> 
   vaporwave: msg`🌴 Vaporwave`,
   chillwave: msg`🌅 Chillwave`,
   celestia: msg`🦄 Princess Celestia`,
+  aurora: msg`🌌 Aurora`,
   hotdog: msg`🌭 Hotdog Stand`,
   cotton: msg`🍭 Cotton Candy`,
   chalkboard: msg`✏️ Chalkboard`,
@@ -70,8 +71,12 @@ export function ThemePicker({ themeId, onChange, visible, locale }: Props) {
             tabIndex={visible ? 0 : -1}
             onChange={(e) => {
               const id = e.target.value as ThemeId;
-              if (id === themeId) return;
-              onChange(id);
+              if (id !== themeId) onChange(id);
+              e.currentTarget.blur();
+            }}
+            onKeyDown={(e) => {
+              if (e.key !== " " && e.code !== "Space" && e.key !== "Escape") return;
+              e.preventDefault();
               e.currentTarget.blur();
             }}
             aria-label={_(msg`Theme`)}

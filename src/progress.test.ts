@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { beginMode, getDigitQuips, getProgress, reportProgress, saveDigitQuips } from "./progress";
+import {
+  beginMode,
+  getDigitQuips,
+  getProgress,
+  reportProgress,
+  rewindProgress,
+  saveDigitQuips,
+} from "./progress";
 
 describe("progress + digit quips", () => {
   beforeEach(() => {
@@ -22,6 +29,13 @@ describe("progress + digit quips", () => {
       clickerCursor: 4,
       holdQuipsEmitted: true,
     });
+  });
+
+  it("rewind pulls the Pi highlight back", () => {
+    beginMode("trainer");
+    reportProgress(12);
+    rewindProgress(0);
+    expect(getProgress()).toBe(0);
   });
 
   it("leaving for another play mode resets both", () => {

@@ -7,6 +7,7 @@ export type ThemeId =
   | "vaporwave"
   | "chillwave"
   | "celestia"
+  | "aurora"
   | "chalkboard"
   | "blueprint"
   | "amber"
@@ -17,11 +18,18 @@ export type ThemeId =
   | "pokeball"
   | "america";
 
+export interface ThemeCycle {
+  scheme: "light" | "dark";
+  /** Five stops for chrome --accent/--tape/--pi-hot and the glyph wave. */
+  stops: readonly [string, string, string, string, string];
+}
+
 export interface Theme {
   id: ThemeId;
   label: string;
   /** CSS custom properties applied to :root */
   vars: Record<string, string>;
+  cycle?: ThemeCycle;
 }
 
 export const THEMES: readonly Theme[] = [
@@ -138,6 +146,10 @@ export const THEMES: readonly Theme[] = [
   {
     id: "celestia",
     label: "🦄 Princess Celestia",
+    cycle: {
+      scheme: "light",
+      stops: ["#3ec8c4", "#c9a0e8", "#f0b0d8", "#6ed4a8", "#e8c04a"],
+    },
     vars: {
       "--bg": "#fff6f8",
       "--bg-elevated": "#ffffff",
@@ -153,6 +165,33 @@ export const THEMES: readonly Theme[] = [
       "--digit": "#3d2a42",
       "--tape": "#6ec8c8",
       "--pi-hot": "#e89ad0",
+      "--font-mono": '"JetBrains Mono", ui-monospace, monospace',
+      "--font-sans": '"Inter", system-ui, sans-serif',
+    },
+  },
+  {
+    id: "aurora",
+    label: "🌌 Aurora",
+    cycle: {
+      scheme: "dark",
+      // Blue → purple → pink → cyan, then a flash of green.
+      stops: ["#4d9dff", "#b07aff", "#ff7ad4", "#3ef0ff", "#5cff88"],
+    },
+    vars: {
+      "--bg": "#06122a",
+      "--bg-elevated": "#0a1a38",
+      "--fg": "#e6f2ff",
+      "--fg-muted": "#7a9cc4",
+      "--fg-faint": "#3d5878",
+      "--accent": "#4d9dff",
+      "--accent-dim": "#2a5a9a",
+      "--correct": "#5cff88",
+      "--wrong": "#ff6b8a",
+      "--chrome-bg": "rgba(6, 18, 42, 0.88)",
+      "--border": "#1a3358",
+      "--digit": "#d8ecff",
+      "--tape": "#3ef0ff",
+      "--pi-hot": "#ff7ad4",
       "--font-mono": '"JetBrains Mono", ui-monospace, monospace',
       "--font-sans": '"Inter", system-ui, sans-serif',
     },
@@ -183,20 +222,20 @@ export const THEMES: readonly Theme[] = [
     id: "cotton",
     label: "🍭 Cotton Candy",
     vars: {
-      "--bg": "#1a1028",
-      "--bg-elevated": "#241538",
-      "--fg": "#f8e8ff",
-      "--fg-muted": "#c9a0dc",
-      "--fg-faint": "#7a5a90",
-      "--accent": "#ff8ec8",
-      "--accent-dim": "#cc5a9a",
-      "--correct": "#8ef0c8",
-      "--wrong": "#ff6b8a",
-      "--chrome-bg": "rgba(26, 16, 40, 0.9)",
-      "--border": "#3a2550",
-      "--digit": "#f8e8ff",
-      "--tape": "#ff8ec8",
-      "--pi-hot": "#ffe566",
+      "--bg": "#b6dff0",
+      "--bg-elevated": "#f3e6ee",
+      "--fg": "#2a2038",
+      "--fg-muted": "#7a6a98",
+      "--fg-faint": "#a898b8",
+      "--accent": "#ee9bb4",
+      "--accent-dim": "#c86a98",
+      "--correct": "#4aa8b8",
+      "--wrong": "#d45a7a",
+      "--chrome-bg": "rgba(182, 223, 240, 0.88)",
+      "--border": "#c5b8d4",
+      "--digit": "#3d2a52",
+      "--tape": "#ee9bb4",
+      "--pi-hot": "#c080d0",
       "--font-mono": '"JetBrains Mono", ui-monospace, monospace',
       "--font-sans": '"Inter", system-ui, sans-serif',
     },
@@ -409,19 +448,30 @@ export function getTheme(id: string | null | undefined): Theme {
 }
 
 const THEME_VAR_KEYS = Object.keys(THEMES[0]!.vars);
-/** Celestia mane — let CSS animate these instead of pinning them inline. */
+/** Let CSS @property animation own these while a cycle theme is on. */
 const ANIMATED_VARS = new Set(["--accent", "--tape", "--pi-hot"]);
 
 export function applyTheme(theme: Theme): void {
   const root = document.documentElement;
   for (const key of THEME_VAR_KEYS) {
-    if (theme.id === "celestia" && ANIMATED_VARS.has(key)) {
+    if (theme.cycle && ANIMATED_VARS.has(key)) {
       root.style.removeProperty(key);
       continue;
     }
     const value = theme.vars[key];
     if (value) root.style.setProperty(key, value);
     else root.style.removeProperty(key);
+  }
+  if (theme.cycle) {
+    root.dataset.cycle = "1";
+    root.dataset.cycleScheme = theme.cycle.scheme;
+    theme.cycle.stops.forEach((c, i) => {
+      root.style.setProperty(`--cycle-${i + 1}`, c);
+    });
+  } else {
+    delete root.dataset.cycle;
+    delete root.dataset.cycleScheme;
+    for (let i = 1; i <= 5; i++) root.style.removeProperty(`--cycle-${i}`);
   }
   root.dataset.theme = theme.id;
 }

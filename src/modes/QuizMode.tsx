@@ -5,8 +5,10 @@ import { burstConfetti } from "../components/PiOclock";
 import { PI_DIGIT_COUNT, PI_DIGITS } from "../data/pi-digits";
 import { useNarrow } from "../hooks/useNarrow";
 import { useSwipe } from "../hooks/useSwipe";
+import { useHotkey } from "../hotkeys/HotkeyContext";
 import { formatOrdinal } from "../utils/ordinal";
 import { pickOne, randInt, shuffleInPlace, wrongDigit } from "../utils/random";
+import { pickRandomGag, randomTrainerSide } from "./trainer-random";
 
 type QuizStyle = "input" | "lr";
 
@@ -290,6 +292,8 @@ export function QuizMode() {
   narrowRef.current = narrow;
   const [style, setStyle] = useState<QuizStyle>("lr");
   const [hintsOn, setHintsOn] = useState(false);
+  useHotkey({ key: "←", label: t`Pick a side`, enabled: style === "lr" });
+  useHotkey({ key: "→", label: t`Pick a side`, enabled: style === "lr" });
   const [q, setQ] = useState<Question>(() => {
     quizSerial = 0;
     return makeQuestion("lr");
@@ -306,6 +310,7 @@ export function QuizMode() {
   const inputRef = useRef<HTMLInputElement>(null);
   const swipeRef = useRef<HTMLDivElement>(null);
   const wrongRun = useRef(0);
+  const randomMisses = useRef(0);
   const roasting = useRef(false);
   const seenDecoy = useRef(false);
   const busy = useRef(false);
@@ -352,7 +357,7 @@ export function QuizMode() {
   }, []);
 
   const finish = useCallback(
-    (ok: boolean, side?: "left" | "right") => {
+    (ok: boolean, side?: "left" | "right", via?: "random") => {
       if (busy.current) return;
       busy.current = true;
       if (side) setHitSide(side);
@@ -361,8 +366,11 @@ export function QuizMode() {
         setRoast((cur) => (cur?.win ? { ...cur, out: true } : cur));
         later(() => setRoast((cur) => (cur?.out ? null : cur)), 420);
       }
+      let party = false;
       if (ok) {
+        randomMisses.current = 0;
         if (styleRef.current === "lr" && wrongRun.current >= 5) {
+          party = true;
           burstConfetti();
           setRoast({ text: roastFinally(wrongRun.current), win: true });
         } else if (roastRef.current && !roastRef.current.win) {
@@ -372,7 +380,11 @@ export function QuizMode() {
         roasting.current = false;
       } else {
         wrongRun.current += 1;
-        if (styleRef.current === "lr") {
+        if (via === "random") {
+          randomMisses.current += 1;
+          setRoast({ text: pickRandomGag(randomMisses.current), win: false });
+        } else if (styleRef.current === "lr") {
+          randomMisses.current = 0;
           if (q.decoy) roasting.current = true;
           if (wrongRun.current >= 5) roasting.current = true;
           if (roasting.current) {
@@ -395,7 +407,7 @@ export function QuizMode() {
         ok,
         text: ok ? t`Correct! It was ${q.correct}` : t`Nope — it was ${q.correct}`,
       });
-      later(() => nextQ(), ok ? 1400 : 1100);
+      later(() => nextQ(), party ? 2800 : ok ? 1400 : 1100);
     },
     [nextQ, q.correct, q.decoy, q.leftDisplay, q.rightDisplay, later],
   );
@@ -407,12 +419,17 @@ export function QuizMode() {
   };
 
   const pickSide = useCallback(
-    (side: "left" | "right") => {
+    (side: "left" | "right", via?: "random") => {
       if (busy.current || q.style === "input") return;
-      finish(side === q.correctSide, side);
+      finish(side === q.correctSide, side, via);
     },
     [finish, q.correctSide, q.style],
   );
+
+  const rollRandom = useCallback(() => {
+    if (!q.correctSide) return;
+    pickSide(randomTrainerSide(q.correctSide), "random");
+  }, [pickSide, q.correctSide]);
 
   useSwipe(
     swipeRef,
@@ -442,12 +459,33 @@ export function QuizMode() {
     timers.current = [];
     // Pro Mode misses must not count toward 50/50 fanfare
     wrongRun.current = 0;
+    randomMisses.current = 0;
     roasting.current = false;
     setRoast(null);
     setStyle(s);
     styleRef.current = s;
     nextQ(s);
   };
+
+  useHotkey({
+    key: "P",
+    label: t`50/50 / Pro`,
+    ignoreTyping: false,
+    onPress: () => changeStyle(styleRef.current === "lr" ? "input" : "lr"),
+  });
+  useHotkey({
+    key: "H",
+    label: t`Hints`,
+    ignoreTyping: false,
+    onPress: () => setHintsOn((v) => !v),
+  });
+  useHotkey({
+    key: "A",
+    label: t`R(a)ndom`,
+    enabled: style === "lr",
+    ignoreTyping: false,
+    onPress: rollRandom,
+  });
 
   return (
     <div
@@ -495,6 +533,17 @@ export function QuizMode() {
         >
           <Trans>Hints</Trans>
         </button>
+        {style === "lr" ? (
+          <button
+            type="button"
+            className="toggle-btn quiz-random-toolbar"
+            data-keep-chrome
+            disabled={busy.current}
+            onClick={rollRandom}
+          >
+            <Trans>Random</Trans>
+          </button>
+        ) : null}
       </div>
 
       <h2 className="quiz-question">
@@ -561,6 +610,15 @@ export function QuizMode() {
             >
               <kbd>←</kbd>
               <span className="choice-digit">{q.leftDisplay}</span>
+            </button>
+            <button
+              type="button"
+              className="toggle-btn quiz-random-board"
+              data-keep-chrome
+              disabled={busy.current}
+              onClick={rollRandom}
+            >
+              <Trans>Random</Trans>
             </button>
             <div className="trainer-current">
               <div className="trainer-prompt">

@@ -70,6 +70,15 @@ export function reportProgress(digitIndex: number): void {
   }
 }
 
+/** Pull the cursor back (Trainer reset, etc.). High-water `reportProgress` cannot. */
+export function rewindProgress(digitIndex: number): void {
+  if (!Number.isFinite(digitIndex)) return;
+  const next = Math.max(0, Math.floor(digitIndex));
+  if (next === index) return;
+  index = next;
+  notify();
+}
+
 export function getProgress(): number {
   return index;
 }

@@ -10,7 +10,7 @@ import { Footer } from "./Footer";
 import { LocalePicker } from "./LocalePicker";
 import { ThemePicker } from "./ThemePicker";
 
-const OPEN_KEY = "chrome-more";
+const OPEN_KEY = "footer-open";
 
 interface Props {
   visible: boolean;

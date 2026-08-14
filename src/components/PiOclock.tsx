@@ -87,9 +87,9 @@ export function burstConfetti() {
     vr: -0.2 + Math.random() * 0.4,
     color: ["#e2b714", "#ff4d6d", "#01cdfe", "#05ffa1", "#fff"][Math.floor(Math.random() * 5)]!,
   }));
-  let frames = 0;
-  const loop = () => {
-    frames += 1;
+  const started = performance.now();
+  const DURATION_MS = 5200;
+  const loop = (now: number) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (const b of bits) {
       b.x += b.vx * scale;
@@ -102,7 +102,7 @@ export function burstConfetti() {
       ctx.fillRect(-b.r, -b.r / 2, b.r * 2, b.r);
       ctx.restore();
     }
-    if (frames < 180) requestAnimationFrame(loop);
+    if (now - started < DURATION_MS) requestAnimationFrame(loop);
     else canvas.remove();
   };
   requestAnimationFrame(loop);

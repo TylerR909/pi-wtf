@@ -32,11 +32,20 @@ export type DigitStep = {
   running: boolean;
 };
 
+/** Floor of the hold ramp — ~3750/min. */
+export const HOLD_MAX_INTERVAL = 16;
+/** Space hold hits that floor here, then Digit can zoooom. */
+export const HOLD_MAX_AT_MS = 2500;
+
 export function holdInterval(held: number): number | null {
   if (held < HOLD_ARM_MS) return null;
-  if (held < 1800) return 170;
-  const t = Math.min(1, (held - 1800) / 10_000);
-  return 100 - t * 84;
+  const t = Math.min(1, (held - HOLD_ARM_MS) / (HOLD_MAX_AT_MS - HOLD_ARM_MS));
+  return 170 - t * (170 - HOLD_MAX_INTERVAL);
+}
+
+export function isHoldMaxSpeed(heldMs: number): boolean {
+  const iv = holdInterval(heldMs);
+  return iv != null && iv <= HOLD_MAX_INTERVAL;
 }
 
 export function tapRate(
@@ -86,9 +95,14 @@ export function createDigitPlay(opts?: { holdQuipsEmitted?: boolean }) {
     return step({ quip: "clicker", hideMs: null });
   };
 
-  const enterHoldSpam = (): DigitStep => {
-    if (lane !== "hold" && holdQuipsEmitted) wantComeback = true;
+  /** Hold roast “you’re back” only after idle/restore — not clicker↔hold. */
+  const claimHold = () => {
+    if (holdQuipsEmitted && lane === "none") wantComeback = true;
     lane = "hold";
+  };
+
+  const enterHoldSpam = (): DigitStep => {
+    claimHold();
     lockQuip("hold");
     const comeback = wantComeback;
     wantComeback = false;
@@ -172,8 +186,7 @@ export function createDigitPlay(opts?: { holdQuipsEmitted?: boolean }) {
       const lastKey = keyStamps[keyStamps.length - 1] ?? 0;
       const mashIntoHold = lane === "hold" && now - lastKey < SPAM_IDLE_MS;
       if (!stayClicker && !mashIntoHold) {
-        if (holdQuipsEmitted) wantComeback = true;
-        lane = "hold";
+        claimHold();
         holdNextAt = downAt + HOLD_QUIP_WARMUP_MS;
       }
     }

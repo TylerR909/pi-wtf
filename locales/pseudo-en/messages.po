@@ -56,6 +56,10 @@ msgid "🌅 Chillwave"
 msgstr ""
 
 #: src/components/ThemePicker.tsx
+msgid "🌌 Aurora"
+msgstr ""
+
+#: src/components/ThemePicker.tsx
 msgid "🌙 Midnight"
 msgstr ""
 
@@ -107,6 +111,10 @@ msgstr ""
 msgid "50/50"
 msgstr ""
 
+#: src/modes/QuizMode.tsx
+msgid "50/50 / Pro"
+msgstr ""
+
 #: src/components/ModeSelector.tsx
 msgid "a serious tool for unserious people"
 msgstr ""
@@ -130,6 +138,14 @@ msgstr ""
 msgid "best {0}"
 msgstr ""
 
+#: src/modes/TrainerMode.tsx
+msgid "best {highScore}"
+msgstr ""
+
+#: src/options/OptionsContext.tsx
+msgid "Bigger type"
+msgstr ""
+
 #: src/modes/BaseMode.tsx
 msgid "Binary"
 msgstr ""
@@ -143,12 +159,28 @@ msgid "Classic"
 msgstr ""
 
 #: src/modes/TrainerMode.tsx
+msgid "Classic / Invert"
+msgstr ""
+
+#: src/modes/TrainerMode.tsx
+msgid "Confirm"
+msgstr ""
+
+#: src/modes/TrainerMode.tsx
+msgid "Confirm reset"
+msgstr ""
+
+#: src/modes/TrainerMode.tsx
 msgid "Correct"
 msgstr ""
 
 #. placeholder {0}: q.correct
 #: src/modes/QuizMode.tsx
 msgid "Correct! It was {0}"
+msgstr ""
+
+#: src/App.tsx
+msgid "Cycle theme"
 msgstr ""
 
 #: src/modes/BaseMode.tsx
@@ -181,8 +213,20 @@ msgstr ""
 msgid "Dozenal"
 msgstr ""
 
+#: src/modes/HackerMode.tsx
+msgid "Dump a chunk"
+msgstr ""
+
+#: src/modes/HackerMode.tsx
+msgid "Dump a lot"
+msgstr ""
+
 #: src/modes/TrainerMode.tsx
 msgid "Endless"
+msgstr ""
+
+#: src/modes/TrainerMode.tsx
+msgid "Endless / Hardcore"
 msgstr ""
 
 #: src/components/FullscreenButton.tsx
@@ -190,7 +234,12 @@ msgid "exit"
 msgstr ""
 
 #: src/components/FullscreenButton.tsx
+#: src/options/OptionsContext.tsx
 msgid "Exit fullscreen"
+msgstr ""
+
+#: src/modes/TapeMode.tsx
+msgid "Faster"
 msgstr ""
 
 #: src/components/FontSizeControl.tsx
@@ -202,6 +251,7 @@ msgid "full"
 msgstr ""
 
 #: src/components/FullscreenButton.tsx
+#: src/options/OptionsContext.tsx
 msgid "Fullscreen"
 msgstr ""
 
@@ -229,8 +279,20 @@ msgstr ""
 msgid "Hide footer"
 msgstr ""
 
+#: src/hotkeys/HotkeyContext.tsx
+msgid "Hide this"
+msgstr ""
+
+#: src/modes/TrainerGameOverScore.tsx
+msgid "High score!"
+msgstr ""
+
 #: src/modes/QuizMode.tsx
 msgid "Hints"
+msgstr ""
+
+#: src/hotkeys/HotkeyContext.tsx
+msgid "Hotkeys"
 msgstr ""
 
 #: src/modes/TrainerMode.tsx
@@ -270,8 +332,17 @@ msgstr ""
 msgid "Modes"
 msgstr ""
 
+#: src/modes/TrainerMode.tsx
+msgid "Nevermind"
+msgstr ""
+
 #: src/modes/BaseMode.tsx
 msgid "Next base"
+msgstr ""
+
+#: src/modes/DigitMode.tsx
+#: src/modes/PiMode.tsx
+msgid "Next digit"
 msgstr ""
 
 #: src/components/ModeSelector.tsx
@@ -308,6 +379,10 @@ msgid "One digit at a time. Press Space to advance."
 msgstr ""
 
 #: src/modes/TapeMode.tsx
+msgid "Pause"
+msgstr ""
+
+#: src/modes/TapeMode.tsx
 msgid "paused"
 msgstr ""
 
@@ -317,6 +392,11 @@ msgstr ""
 
 #: src/modes/BaseMode.tsx
 msgid "Pi in other bases"
+msgstr ""
+
+#: src/modes/QuizMode.tsx
+#: src/modes/TrainerMode.tsx
+msgid "Pick a side"
 msgstr ""
 
 #: src/modes/QuizMode.tsx
@@ -339,8 +419,16 @@ msgstr ""
 msgid "Previous theme"
 msgstr ""
 
+#: src/modes/PiMode.tsx
+msgid "Pro"
+msgstr ""
+
 #: src/modes/QuizMode.tsx
 msgid "Pro Mode"
+msgstr ""
+
+#: src/components/ProToggle.tsx
+msgid "Pro: type to reveal"
 msgstr ""
 
 #: src/components/ModeSelector.tsx
@@ -351,8 +439,22 @@ msgstr ""
 msgid "Quiz: what digit is at position N"
 msgstr ""
 
+#: src/modes/QuizMode.tsx
+#: src/modes/TrainerMode.tsx
+msgid "R(a)ndom"
+msgstr ""
+
 #: src/components/ModeSelector.tsx
 msgid "Rain"
+msgstr ""
+
+#: src/modes/QuizMode.tsx
+#: src/modes/TrainerMode.tsx
+msgid "Random"
+msgstr ""
+
+#: src/App.tsx
+msgid "Random theme"
 msgstr ""
 
 #: src/modes/TrainerMode.tsx
@@ -369,7 +471,13 @@ msgid "Roman"
 msgstr ""
 
 #: src/modes/QuizMode.tsx
+#: src/modes/TrainerGameOverScore.tsx
+#: src/modes/TrainerMode.tsx
 msgid "Score"
+msgstr ""
+
+#: src/modes/TrainerGameOverScore.tsx
+msgid "Score {score}"
 msgstr ""
 
 #: src/modes/PiMode.tsx
@@ -377,7 +485,11 @@ msgid "Scrollable digits of pi"
 msgstr ""
 
 #: src/modes/ChaosMode.tsx
-msgid "Shake to change theme"
+msgid "Shake anywhere to change theme"
+msgstr ""
+
+#: src/components/ProToggle.tsx
+msgid "Show every digit"
 msgstr ""
 
 #: src/components/ChromeBottom.tsx
@@ -392,8 +504,20 @@ msgstr ""
 msgid "Slow scroll + measuring tape"
 msgstr ""
 
+#: src/modes/TapeMode.tsx
+msgid "Slower / rewind"
+msgstr ""
+
+#: src/options/OptionsContext.tsx
+msgid "Smaller type"
+msgstr ""
+
 #: src/components/ModeSelector.tsx
 msgid "Spacebar one-at-a-time"
+msgstr ""
+
+#: src/modes/HackerMode.tsx
+msgid "Spill digits"
 msgstr ""
 
 #: src/modes/TrainerMode.tsx
@@ -435,6 +559,14 @@ msgstr ""
 
 #: src/modes/TrainerMode.tsx
 msgid "Try again"
+msgstr ""
+
+#: src/modes/PiMode.tsx
+msgid "Type the next digit"
+msgstr ""
+
+#: src/modes/PiMode.tsx
+msgid "Type the next digit of pi"
 msgstr ""
 
 #: src/components/ModeSelector.tsx

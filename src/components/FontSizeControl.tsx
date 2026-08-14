@@ -39,3 +39,11 @@ export function FontSizeControl({ value, onChange }: Props) {
 export function fontSizePx(id: FontSizeId): number {
   return FONT_SIZES.find((s) => s.id === id)?.px ?? 16;
 }
+
+/** Clamp at the ends — XL then + stays XL. */
+export function cycleFontSize(current: FontSizeId, dir: 1 | -1): FontSizeId {
+  const i = FONT_SIZES.findIndex((s) => s.id === current);
+  const at = i < 0 ? 1 : i;
+  const next = Math.min(FONT_SIZES.length - 1, Math.max(0, at + dir));
+  return FONT_SIZES[next]!.id;
+}

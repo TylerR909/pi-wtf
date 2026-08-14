@@ -6,9 +6,12 @@ import { ChromeBottom } from "./components/ChromeBottom";
 import { MODES, ModeSelector } from "./components/ModeSelector";
 import { PiOclock } from "./components/PiOclock";
 import { useChromeVisibility } from "./hooks/useChromeVisibility";
+import { useDevtoolsQuip } from "./hooks/useDevtoolsQuip";
 import { useNarrow } from "./hooks/useNarrow";
 import { useShake } from "./hooks/useShake";
+import { useTabPresence } from "./hooks/useTabPresence";
 import { useWakeLock } from "./hooks/useWakeLock";
+import { HotkeyProvider, useHotkey } from "./hotkeys/HotkeyContext";
 import { activateLocale, type LocaleId, loadStoredLocale, storeLocale } from "./i18n";
 import { BaseMode } from "./modes/BaseMode";
 import { ChaosMode } from "./modes/ChaosMode";
@@ -67,7 +70,9 @@ function ModeStage({ mode }: { mode: ModeId }) {
 export default function App() {
   return (
     <OptionsProvider>
-      <AppChrome />
+      <HotkeyProvider>
+        <AppChrome />
+      </HotkeyProvider>
     </OptionsProvider>
   );
 }
@@ -76,6 +81,8 @@ function AppChrome() {
   const { _, i18n } = useLingui();
   const idleOk = useIdleChrome();
   const themeHotkey = useThemeHotkey();
+  useTabPresence();
+  useDevtoolsQuip();
   const [mode, setMode] = useState<ModeId>("digit");
   const [themeId, setThemeId] = useState<ThemeId>(initialTheme);
 
@@ -91,7 +98,7 @@ function AppChrome() {
   const [docFs, setDocFs] = useState(() => isFullscreenNow());
   // Phones keep chrome up — idle/focus fade is a desktop “get out of the way” trick.
   const { chromeVisible } = useChromeVisibility(immersive, docFs, !idleOk || narrow);
-  useShake(narrow && mode === "chaos", narrow && mode === "chaos", () => {
+  useShake(narrow, narrow, () => {
     setThemeId((cur) => randomThemeId(cur));
   });
   // Screen stay-awake only. A PWA cannot run in the background.
@@ -106,6 +113,8 @@ function AppChrome() {
       return;
     }
     setFsExitOn(true);
+    // Phones have no mouse to revive Exit — keep it up, below the status bar.
+    if (narrow) return;
     let t = window.setTimeout(() => setFsExitOn(false), 2800);
     const onMove = () => {
       setFsExitOn(true);
@@ -117,7 +126,7 @@ function AppChrome() {
       window.clearTimeout(t);
       window.removeEventListener("mousemove", onMove);
     };
-  }, [docFs]);
+  }, [docFs, narrow]);
 
   const changeLocale = useCallback(async (id: LocaleId) => {
     await activateLocale(id);
@@ -130,27 +139,22 @@ function AppChrome() {
     setMode(id);
   }, []);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) {
-        return;
-      }
-      if ((e.key === "r" || e.key === "R") && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        // Mash-key modes (Hacker) register themeKey: false — same idea as F.
-        if (!themeHotkey || mode === "hacker") return;
-        e.preventDefault();
-        setThemeId((cur) => randomThemeId(cur));
-        return;
-      }
-      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
-      e.preventDefault();
-      const dir: 1 | -1 = e.key === "ArrowDown" ? 1 : -1;
-      setThemeId((cur) => cycleThemeId(cur, dir));
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [themeHotkey, mode]);
+  useHotkey({
+    key: "R",
+    label: _(msg`Random theme`),
+    enabled: themeHotkey && mode !== "hacker",
+    onPress: () => setThemeId((cur) => randomThemeId(cur)),
+  });
+  useHotkey({
+    key: "↑",
+    label: _(msg`Cycle theme`),
+    onPress: () => setThemeId((cur) => cycleThemeId(cur, -1)),
+  });
+  useHotkey({
+    key: "↓",
+    label: _(msg`Cycle theme`),
+    onPress: () => setThemeId((cur) => cycleThemeId(cur, 1)),
+  });
 
   return (
     <div
@@ -184,7 +188,7 @@ function AppChrome() {
           </>
         )}
         <OptionsHost
-          visible={docFs ? fsExitOn : chromeVisible}
+          visible={docFs ? narrow || fsExitOn : chromeVisible}
           exitOnly={docFs}
           fontSize={!narrow}
         />

@@ -41,40 +41,45 @@
   initial-value: #ff4d6d;
 }
 
-/* Celestia's mane — teal, lavender, pink, mint, gold, looping. */
-html[data-theme="celestia"] {
-  color-scheme: light;
-  animation: celestia-mane 16s ease-in-out infinite;
+/* Cycle themes (Celestia, Aurora): chrome colors + glyph wave share --cycle-1…5. */
+html[data-cycle] {
+  animation: theme-cycle 16s ease-in-out infinite;
 }
-@keyframes celestia-mane {
+html[data-cycle-scheme="light"] {
+  color-scheme: light;
+}
+html[data-cycle-scheme="dark"] {
+  color-scheme: dark;
+}
+@keyframes theme-cycle {
   0%,
   100% {
-    --accent: #3ec8c4;
-    --tape: #c9a0e8;
-    --pi-hot: #f0b0d8;
+    --accent: var(--cycle-1);
+    --tape: var(--cycle-2);
+    --pi-hot: var(--cycle-3);
   }
   20% {
-    --accent: #c9a0e8;
-    --tape: #f0b0d8;
-    --pi-hot: #6ed4a8;
+    --accent: var(--cycle-2);
+    --tape: var(--cycle-3);
+    --pi-hot: var(--cycle-4);
   }
   40% {
-    --accent: #f0b0d8;
-    --tape: #6ed4a8;
-    --pi-hot: #e8c04a;
+    --accent: var(--cycle-3);
+    --tape: var(--cycle-4);
+    --pi-hot: var(--cycle-5);
   }
   60% {
-    --accent: #6ed4a8;
-    --tape: #e8c04a;
-    --pi-hot: #3ec8c4;
+    --accent: var(--cycle-4);
+    --tape: var(--cycle-5);
+    --pi-hot: var(--cycle-1);
   }
   80% {
-    --accent: #e8c04a;
-    --tape: #3ec8c4;
-    --pi-hot: #c9a0e8;
+    --accent: var(--cycle-5);
+    --tape: var(--cycle-1);
+    --pi-hot: var(--cycle-2);
   }
 }
-@keyframes celestia-wave {
+@keyframes theme-wave {
   to {
     background-position: -200% 0;
   }
@@ -91,6 +96,7 @@ body,
 #root {
   height: 100%;
   min-height: 100dvh;
+  min-width: 20rem;
   margin: 0;
 }
 
@@ -98,7 +104,8 @@ body {
   font-family: var(--font-sans);
   background: var(--bg);
   color: var(--fg);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -150,12 +157,39 @@ a {
   display: grid;
   grid-template-rows: auto 1fr auto;
   min-height: 100dvh;
+  min-width: 20rem;
+  /* Floor for a crushed desktop window (DevTools docked). Narrow / Digit
+     drop this because type already scales down. Rain + Tape stay 1 viewport. */
+  --mode-min-h: 32rem;
+}
+.app[data-mode="digit"] {
+  --mode-min-h: 26rem;
+}
+.app[data-mode="trainer"] {
+  --mode-min-h: 44rem;
+}
+.app[data-mode="quiz"] {
+  --mode-min-h: 40rem;
+}
+.app[data-mode="base"] {
+  --mode-min-h: 36rem;
+}
+.app[data-mode="pi"],
+.app[data-mode="hacker"] {
+  --mode-min-h: 24rem;
+}
+.app[data-mode="tape"],
+.app[data-mode="chaos"] {
+  --mode-min-h: 100dvh;
 }
 
 /* True browser-fullscreen: stage is the viewport; chrome overlays and can vanish. */
 .app.is-fs {
   display: block;
   position: relative;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
 }
 .app.is-fs .stage {
   position: absolute;
@@ -237,16 +271,15 @@ a {
   pointer-events: none;
 }
 .options-host .fullscreen-btn,
-.options-host .header-fs {
+.options-host .header-fs,
+.options-host .pro-btn {
   position: static;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
   line-height: 1;
-}
-.options-host:has(.font-size-control) .fullscreen-btn,
-.options-host:has(.font-size-control) .header-fs {
+  min-height: 1.85rem;
   padding-block: 0;
 }
 
@@ -364,6 +397,7 @@ a {
   gap: 0.15rem;
   align-items: flex-end;
   box-sizing: border-box;
+  min-height: 1.85rem;
   padding: 0.15rem 0.25rem;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -501,7 +535,6 @@ a {
   transition: opacity var(--ease);
 }
 .app[data-chrome="0"] .mode-hint,
-.app[data-chrome="0"] .hacker-mode .digit-meta,
 .app[data-chrome="0"] .ss-speed,
 .app[data-chrome="0"] .quiz-toolbar,
 .app[data-chrome="0"] .quiz-score-row,
@@ -552,12 +585,75 @@ a {
   color: var(--fg);
   border-color: var(--accent);
 }
+.pro-btn.is-on,
+.pro-btn[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
 
 .digit-meta {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--fg-muted);
   letter-spacing: 0.04em;
+}
+.digit-rate {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  letter-spacing: 0.06em;
+  min-height: 1em;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+.digit-rate[data-show="1"] {
+  opacity: 1;
+}
+
+.hotkey-card {
+  position: fixed;
+  right: 0.75rem;
+  bottom: max(5.25rem, calc(env(safe-area-inset-bottom, 0px) + 5rem));
+  z-index: 50;
+  min-width: 12.5rem;
+  max-width: min(18rem, calc(100vw - 1.5rem));
+  padding: 0.65rem 0.75rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  box-shadow: 0 10px 32px color-mix(in srgb, #000 35%, transparent);
+  color: var(--fg);
+  pointer-events: auto;
+}
+.hotkey-card-title {
+  margin: 0 0 0.4rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+.hotkey-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.28rem;
+}
+.hotkey-card li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 0.65rem;
+  font-size: 0.8rem;
+}
+.hotkey-card kbd {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  white-space: nowrap;
 }
 
 .site-footer {
@@ -640,6 +736,23 @@ a {
   color: var(--digit);
   opacity: 0.72;
 }
+.pi-caret {
+  display: inline;
+  color: var(--accent);
+  animation: blink 1s step-end infinite;
+}
+.pi-pro-input {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  border: 0;
+  font-size: 16px;
+}
 .pi-sel-tip {
   position: fixed;
   z-index: 40;
@@ -676,6 +789,16 @@ a {
 .digit-mode {
   gap: 1rem;
   contain: layout style;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+}
+.digit-mode * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 .digit-giant {
   font-family: var(--font-mono);
@@ -684,7 +807,9 @@ a {
   line-height: 0.9;
   color: var(--digit);
   text-shadow: 0 0 60px color-mix(in srgb, var(--accent) 25%, transparent);
+  -webkit-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none;
   /* Avoid layout thrash; tabular nums keep width stable-ish */
   font-variant-numeric: tabular-nums;
   min-width: 1ch;
@@ -749,12 +874,23 @@ a {
   padding-top: clamp(4rem, 14vh, 8rem);
 }
 .trainer-toolbar {
+  order: 1;
   display: flex;
   flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  justify-content: center;
+  align-items: center;
+}
+.trainer-toolbar-modes,
+.trainer-toolbar-actions {
+  display: flex;
+  flex-wrap: nowrap;
   gap: 0.5rem;
   justify-content: center;
+  align-items: center;
 }
 .trainer-score {
+  order: 2;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -775,7 +911,70 @@ a {
   padding: 0;
   font-size: inherit;
 }
+.trainer-banner {
+  order: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.12rem;
+  width: min(18rem, 92vw);
+  margin: 0.15rem auto 0.1rem;
+  padding: 0.55rem 1.25rem 0.6rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+  background:
+    radial-gradient(
+      120% 80% at 50% 0%,
+      color-mix(in srgb, var(--accent) 28%, transparent),
+      transparent 70%
+    ),
+    color-mix(in srgb, var(--bg-elevated) 88%, var(--accent));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent),
+    0 10px 28px color-mix(in srgb, var(--accent) 16%, transparent);
+  pointer-events: none;
+}
+.trainer-banner[data-on="0"] {
+  visibility: hidden;
+}
+.trainer-mode > .mode-hint {
+  order: 5;
+}
+.trainer-mode > .game-over {
+  order: 6;
+}
+.trainer-banner-kicker {
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent) 80%, var(--fg));
+  font-weight: 700;
+}
+.trainer-banner-value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.85rem, 6vw, 2.55rem);
+  line-height: 1;
+  color: var(--fg);
+  animation: trainer-banner-pop 280ms ease;
+}
+.trainer-banner-best {
+  font-size: 0.72rem;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+}
+@keyframes trainer-banner-pop {
+  from {
+    transform: scale(1.18);
+    color: var(--accent);
+  }
+  to {
+    transform: scale(1);
+  }
+}
 .trainer-board {
+  order: 3;
   display: grid;
   grid-template-columns: 11rem minmax(8rem, 18rem) 11rem;
   justify-content: center;
@@ -824,7 +1023,7 @@ a {
   opacity: 0.45;
 }
 .trainer-choice kbd {
-  font-size: 0.75rem;
+  font-size: 1.35rem;
   color: var(--fg-faint);
   order: -1; /* always symbol on top for both sides */
 }
@@ -955,9 +1154,60 @@ a {
   color: var(--fg-muted);
   max-width: 22rem;
 }
-.game-over kbd {
-  font-size: 0.75em;
-  opacity: 0.8;
+.go-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  margin: 0.25rem 0 0.15rem;
+}
+.go-score-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+.go-score-value {
+  display: block;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2.6rem, 11vw, 4.4rem);
+  line-height: 1;
+  color: var(--fg);
+  text-align: center;
+}
+.go-high {
+  margin: 0.15rem 0 0;
+  min-height: 1.35em;
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  visibility: hidden;
+}
+.go-high.is-on {
+  visibility: visible;
+  animation: go-high-pop 420ms ease;
+}
+.go-taint {
+  margin: 0.35rem 0 0;
+  min-height: 2.6em;
+  color: var(--wrong);
+  font-style: italic;
+  max-width: 22rem;
+  visibility: hidden;
+}
+.go-taint.is-on {
+  visibility: visible;
+}
+@keyframes go-high-pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* —— Tape —— */
@@ -1138,32 +1388,36 @@ html[data-theme="paper"] .hacker-scroll {
   word-break: break-all;
   font-family: inherit;
 }
-/* Celestia: mane as a traveling wave across glyphs, not a flat cycle. */
-html[data-theme="celestia"] .hacker-stream,
-html[data-theme="celestia"] .pi-hi {
+/* Traveling wave across glyphs. Stops come from the theme. */
+html[data-cycle] .hacker-stream,
+html[data-cycle] .pi-hi {
   background-image: linear-gradient(
     90deg,
-    #3ec8c4 0%,
-    #c9a0e8 20%,
-    #f0b0d8 40%,
-    #6ed4a8 60%,
-    #e8c04a 80%,
-    #3ec8c4 100%
+    var(--cycle-1) 0%,
+    var(--cycle-2) 20%,
+    var(--cycle-3) 40%,
+    var(--cycle-4) 60%,
+    var(--cycle-5) 80%,
+    var(--cycle-1) 100%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
-  animation: celestia-wave 12s linear infinite;
+  animation: theme-wave 12s linear infinite;
 }
-/* Selection only allows a color — ride the same mane vars as the chrome. */
-html[data-theme="celestia"] .pi-stream::selection {
+html[data-cycle-scheme="light"] .pi-stream::selection {
   background-color: color-mix(in srgb, var(--accent) 48%, #fff 18%);
   color: #3d2a42;
   -webkit-text-fill-color: #3d2a42;
 }
-html[data-theme="celestia"] .pi-hi::selection {
+html[data-cycle-scheme="dark"] .pi-stream::selection {
+  background-color: color-mix(in srgb, var(--accent) 42%, #041018);
+  color: #eaf8ff;
+  -webkit-text-fill-color: #eaf8ff;
+}
+html[data-cycle] .pi-hi::selection {
   background-color: color-mix(in srgb, var(--accent) 38%, transparent);
   color: transparent;
   -webkit-text-fill-color: transparent;
@@ -1232,6 +1486,12 @@ html[data-theme="celestia"] .pi-hi::selection {
   align-items: center;
   gap: 0.75rem;
   justify-content: center;
+}
+.quiz-toolbar-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  align-items: center;
 }
 .seg {
   display: flex;
@@ -1486,6 +1746,9 @@ html[data-theme="celestia"] .pi-hi::selection {
   font-size: 0.7rem;
   color: var(--fg-faint);
 }
+.quiz-random-board {
+  display: none;
+}
 @media (pointer: coarse) {
   .trainer-board,
   .quiz-swipe {
@@ -1553,6 +1816,13 @@ html[data-theme="celestia"] .pi-hi::selection {
 }
 .stepper-btn:disabled {
   opacity: 0.35;
+}
+.base-stepper .stepper-btn:focus {
+  outline: none;
+}
+.base-stepper .stepper-btn.is-flash {
+  background: color-mix(in srgb, var(--accent) 35%, var(--bg-elevated));
+  color: var(--fg);
 }
 .stepper-mid {
   width: 3.1rem;
@@ -1622,8 +1892,93 @@ html[data-theme="celestia"] .pi-hi::selection {
   color: var(--fg-muted);
 }
 
+/* Short *desktop* viewport (wide DevTools, laptop split).
+   Phones stay viewport-locked — 100dvh + overflow:auto here was
+   starting Safari/Chrome scrolled past the header. */
+@media (min-width: 721px) and (max-height: 700px) {
+  html,
+  body,
+  #root {
+    height: auto;
+    min-height: 100dvh;
+  }
+  body {
+    overflow-y: auto;
+  }
+  .app {
+    height: auto;
+    min-height: max(100dvh, var(--mode-min-h));
+  }
+  .stage {
+    overflow: visible;
+  }
+  .mode {
+    height: auto;
+    min-height: 16rem;
+  }
+  .trainer-mode {
+    padding-top: 1.25rem;
+    contain: none;
+  }
+  .mode-hint {
+    position: static;
+    transform: none;
+    margin-top: 0.5rem;
+  }
+  .app[data-mode="tape"],
+  .app[data-mode="chaos"] {
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+  .app[data-mode="tape"] .stage,
+  .app[data-mode="chaos"] .stage,
+  .app[data-mode="tape"] .mode,
+  .app[data-mode="chaos"] .mode {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
 /* —— Responsive / mobile —— */
 @media (max-width: 720px) {
+  html,
+  body,
+  #root,
+  .app {
+    height: 100%;
+    min-height: 100svh;
+    overflow: hidden;
+  }
+  body {
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+  .app {
+    --mode-min-h: 28rem;
+  }
+  .app[data-mode="digit"] {
+    --mode-min-h: 20rem;
+  }
+  .app[data-mode="trainer"] {
+    --mode-min-h: 34rem;
+  }
+  .app[data-mode="quiz"] {
+    --mode-min-h: 30rem;
+  }
+  .app[data-mode="base"] {
+    --mode-min-h: 30rem;
+  }
+  .app[data-mode="pi"],
+  .app[data-mode="hacker"] {
+    --mode-min-h: 22rem;
+  }
+  .app[data-mode="tape"],
+  .app[data-mode="chaos"] {
+    --mode-min-h: 100dvh;
+  }
+
   .chrome-top {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -1657,11 +2012,23 @@ html[data-theme="celestia"] .pi-hi::selection {
     grid-row: 1;
     justify-self: end;
   }
+  .app.is-fs .chrome-top {
+    padding: calc(env(safe-area-inset-top, 0px) + 0.55rem) 0.65rem 0.4rem;
+  }
+  .app.is-fs .options-host {
+    top: calc(env(safe-area-inset-top, 0px) + 0.55rem);
+    right: 0.65rem;
+  }
+  .options-host .header-fs,
+  .options-host .pro-btn {
+    min-height: 2.35rem;
+    padding: 0 0.55rem;
+    gap: 0;
+    font-size: 0.8rem;
+  }
   .options-host .header-fs {
     width: 2.5rem;
-    min-height: 2.35rem;
     padding: 0;
-    gap: 0;
     font-size: 1.15rem;
   }
   .font-size-control {
@@ -1721,10 +2088,27 @@ html[data-theme="celestia"] .pi-hi::selection {
     justify-content: space-evenly;
   }
 
+  .app {
+    grid-template-rows: auto 1fr;
+  }
   .chrome-bottom {
     display: flex;
     justify-content: center;
-    padding: 0.1rem 0.75rem 0.4rem;
+    padding: 0;
+  }
+  .hotkey-card {
+    bottom: max(3.6rem, calc(env(safe-area-inset-bottom, 0px) + 3.1rem));
+  }
+  .chrome-bottom.is-drawer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 24;
+    pointer-events: none;
+  }
+  .chrome-bottom.is-drawer > * {
+    pointer-events: auto;
   }
   .chrome-bottom.is-drawer.is-hidden {
     opacity: 0;
@@ -1732,14 +2116,19 @@ html[data-theme="celestia"] .pi-hi::selection {
   }
   .chrome-more {
     width: 2.75rem;
+    margin-bottom: max(0.3rem, env(safe-area-inset-bottom, 0px));
     border: 1px solid var(--border);
     border-radius: 999px;
     background: var(--chrome-bg);
     backdrop-filter: blur(8px);
   }
+  .chrome-more:not([open]) .chrome-drawer-body {
+    display: none;
+  }
   .chrome-more[open] {
-    width: 100%;
-    border-radius: 10px;
+    width: calc(100% - 0.9rem);
+    margin: 0 0.45rem max(0.3rem, env(safe-area-inset-bottom, 0px));
+    border-radius: 14px;
   }
   .chrome-more > summary {
     list-style: none;
@@ -1768,7 +2157,7 @@ html[data-theme="celestia"] .pi-hi::selection {
     display: flex;
     flex-direction: column;
     gap: 0.45rem;
-    padding: 0 0.6rem 0.6rem;
+    padding: 0 0.6rem 0.45rem;
   }
   .chrome-dock {
     grid-column: auto;
@@ -1827,9 +2216,39 @@ html[data-theme="celestia"] .pi-hi::selection {
 
   .trainer-mode {
     justify-content: center;
-    padding-top: 0;
-    padding-bottom: 0.25rem;
-    gap: 0.85rem;
+    height: 100%;
+    min-height: 100%;
+    padding-top: 0.35rem;
+    /* Leave the overlay chevron so the cards sit in the real middle. */
+    padding-bottom: 3.4rem;
+    gap: 0.75rem;
+  }
+  .trainer-banner {
+    order: 0;
+    width: min(20.5rem, 92vw);
+  }
+  .trainer-toolbar {
+    flex-direction: column;
+    gap: 0.4rem;
+    width: min(20.5rem, 92vw);
+  }
+  .trainer-toolbar-modes,
+  .trainer-toolbar-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 0.4rem;
+  }
+  .trainer-toolbar-modes .seg {
+    width: 100%;
+  }
+  .trainer-toolbar-modes .seg button,
+  .trainer-toolbar-actions .toggle-btn {
+    flex: 1;
+    min-width: 0;
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+    white-space: nowrap;
   }
   .trainer-board,
   .quiz-lr {
@@ -1884,9 +2303,23 @@ html[data-theme="celestia"] .pi-hi::selection {
   }
   .quiz-toolbar {
     order: 2;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    width: auto;
+    max-width: 100%;
+  }
+  .quiz-random-toolbar {
+    display: none;
   }
   .quiz-question {
     order: 3;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .quiz-ordinal {
+    min-width: 0;
   }
   .quiz-hint-slot {
     order: 4;
@@ -1923,13 +2356,21 @@ html[data-theme="celestia"] .pi-hi::selection {
     height: 4.25rem;
     font-size: 1.4rem;
   }
-  /* 50/50: cards in the thumb row, prompt underneath. */
+  /* 50/50: cards, then Random (full width of both), then Pick one. */
   .quiz-lr {
     max-width: 16.5rem;
     gap: 0.4rem 0.45rem;
     grid-template-areas:
       "left right"
+      "random random"
       "stack stack";
+  }
+  .quiz-random-board {
+    display: flex;
+    grid-area: random;
+    width: 100%;
+    justify-content: center;
+    padding: 0.45rem 0.75rem;
   }
   .quiz-lr .trainer-choice {
     padding: 0.85rem 0.35rem;
@@ -1942,17 +2383,37 @@ html[data-theme="celestia"] .pi-hi::selection {
   }
 
   .digit-mode {
-    justify-content: center;
+    display: grid;
+    justify-items: center;
+    align-content: stretch;
+    grid-template-rows: 1fr auto auto 1fr;
+    grid-template-areas:
+      "quip"
+      "digit"
+      "meta"
+      "pad";
+    height: 100%;
+    min-height: 100%;
+    cursor: pointer;
   }
-  .digit-quip {
-    order: 1;
-  }
-  .digit-meta {
-    order: 2;
+  .digit-quip,
+  .digit-rate {
+    grid-area: quip;
+    align-self: end;
+    order: unset;
   }
   .digit-giant {
-    order: 3;
+    grid-area: digit;
+    order: unset;
     font-size: clamp(4.5rem, 32vw, 10rem);
+  }
+  .digit-meta {
+    grid-area: meta;
+    align-self: start;
+    order: unset;
+  }
+  .app[data-mode="digit"] .stage {
+    cursor: pointer;
   }
   .ss-legend {
     bottom: 2.5rem;
@@ -1960,6 +2421,13 @@ html[data-theme="celestia"] .pi-hi::selection {
   }
   .game-over h2 {
     font-size: 1.6rem;
+  }
+}
+
+/* Landscape phone: Digit already shrinks with vw, so the floor can drop. */
+@media (max-width: 720px) and (max-height: 500px) {
+  .app[data-mode="digit"] {
+    --mode-min-h: 16rem;
   }
 }
 

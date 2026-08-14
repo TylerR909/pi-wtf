@@ -2,17 +2,22 @@ import { t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { useEffect, useRef } from "react";
 import { PI_DIGITS } from "../data/pi-digits";
+import { useHotkey } from "../hotkeys/HotkeyContext";
 import { useOptions } from "../options/OptionsContext";
 import { beginMode, reportProgress } from "../progress";
 import { isTypingTarget } from "../utils/keys";
 
 export function HackerMode() {
   useLingui();
+  useHotkey({ key: "any", label: t`Spill digits` });
+  useHotkey({ key: "Space", label: t`Dump a chunk` });
+  useHotkey({ key: "Enter", label: t`Dump a lot` });
   const { fontPx } = useOptions({
     fullscreen: true,
     fullscreenKey: false,
     themeKey: false,
     fontSize: true,
+    fontSizeKey: false,
     defaultFontSize: "m",
   });
   const streamRef = useRef<HTMLPreElement>(null);

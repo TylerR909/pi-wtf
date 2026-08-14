@@ -67,6 +67,7 @@ export const SPACEBAR_QUIPS: readonly string[] = [
   "Then not softly at all.",
   "Are you trying to make the page crash?",
   "Because this is how you make the page crash (emotionally).",
+  "You're playing this like a drum pad.",
   "Spacebar go brrrr.",
   "Digit go brrrr.",
   "Sanity go bye-bye.",
@@ -313,6 +314,9 @@ export const SPACEBAR_QUIPS: readonly string[] = [
   "Or just keep holding. We'll keep diagnosing.",
 ] as const;
 
+/** How they're actually advancing digits right now. */
+export type DigitQuipBehavior = "space-hold" | "pointer-hold" | "spam" | "click" | "tap";
+
 /** Jokes that only work if they're actually holding a key. */
 const KEYBOARD_ONLY = new Set<string>([
   "Congrats on discovering the hold key.",
@@ -326,8 +330,32 @@ const KEYBOARD_ONLY = new Set<string>([
   "You know Space repeats if you just… stay.",
 ]);
 
+const HOLD_RE =
+  /\bhold(s|ing)?\b|\bheld\b|mid-hold|auto-repeat|\bturbo\b|hold function|release the key|let go of the key|keep your finger|don'?t lift|key depression/i;
+const SPACE_RE = /spacebar|\bkeyboard\b|\bSpace\b/;
+const CLICK_RE = /\bclicks?\b|\bclicking\b|cookie clicker|\bcps\b/i;
+const TAP_RE = /\btaps?\b|\btapping\b|\bthumb\b|finger on the screen|lift, tap/i;
+/** Mash / peck jokes — fine for spam, nonsense while sitting on a key. */
+const PECK_RE = /drum pad|rhythm game/i;
+
 export function isKeyboardQuip(text: string): boolean {
   return KEYBOARD_ONLY.has(text) || /spacebar|keyboard/i.test(text);
+}
+
+/** True when this line is about a different input than the one they're using. */
+export function quipMisfits(text: string, behavior: DigitQuipBehavior): boolean {
+  switch (behavior) {
+    case "space-hold":
+      return PECK_RE.test(text);
+    case "pointer-hold":
+      return isKeyboardQuip(text) || SPACE_RE.test(text) || PECK_RE.test(text);
+    case "spam":
+      return HOLD_RE.test(text);
+    case "click":
+      return isKeyboardQuip(text) || SPACE_RE.test(text) || HOLD_RE.test(text) || TAP_RE.test(text);
+    case "tap":
+      return isKeyboardQuip(text) || SPACE_RE.test(text) || HOLD_RE.test(text) || CLICK_RE.test(text);
+  }
 }
 
 /**
@@ -359,12 +387,16 @@ function nextFromList(
     i = (i + 1) % n;
     hops += 1;
   }
+  if (hops >= n && skip(list[i] ?? "")) return { text: "...", next: i + 1 };
   return { text: list[i] ?? "...", next: i + 1 };
 }
 
 /** Sequential cursor through the list (monotonic escalation during one session). */
-export function nextQuip(cursor: number, pointer = false): { text: string; next: number } {
-  return nextFromList(SPACEBAR_QUIPS, cursor, (s) => pointer && isKeyboardQuip(s));
+export function nextQuip(
+  cursor: number,
+  behavior: DigitQuipBehavior = "space-hold",
+): { text: string; next: number } {
+  return nextFromList(SPACEBAR_QUIPS, cursor, (s) => quipMisfits(s, behavior));
 }
 
 /** After they quit and come back to holding. Pick ~7, then resume the main list. */
@@ -396,15 +428,19 @@ export const COMEBACK_QUIPS: readonly string[] = [
   "Look who's holding again.",
 ];
 
-export function takeComebacks(count = 7, rng = Math.random): string[] {
-  const copy = COMEBACK_QUIPS.slice();
+export function takeComebacks(
+  count = 7,
+  rng = Math.random,
+  behavior: DigitQuipBehavior = "space-hold",
+): string[] {
+  const copy = COMEBACK_QUIPS.filter((s) => !quipMisfits(s, behavior));
   shuffleInPlace(copy, rng);
   return copy.slice(0, Math.min(count, copy.length));
 }
 
 /**
  * Cookie-clicker / tap-tap-tap. Separate from the hold bit.
- * Keyboard-only and pointer-only lines are filtered by `pointer`.
+ * Lines about the wrong input (hold / spacebar / click vs tap) are skipped.
  */
 export const CLICKER_QUIPS: readonly string[] = [
   "Click. Click. Click.",
@@ -438,15 +474,11 @@ export const CLICKER_QUIPS: readonly string[] = [
   "Lift, tap, lift, tap. Or don't lift.",
 ];
 
-const CLICKER_POINTER_ONLY = new Set<string>([
-  "You can just keep your finger on the screen. That's a feature.",
-  "Lift, tap, lift, tap. Or don't lift.",
-]);
-
-export function nextClickerQuip(cursor: number, pointer = false): { text: string; next: number } {
-  return nextFromList(CLICKER_QUIPS, cursor, (s) =>
-    pointer ? isKeyboardQuip(s) : CLICKER_POINTER_ONLY.has(s),
-  );
+export function nextClickerQuip(
+  cursor: number,
+  behavior: DigitQuipBehavior = "click",
+): { text: string; next: number } {
+  return nextFromList(CLICKER_QUIPS, cursor, (s) => quipMisfits(s, behavior));
 }
 
 /** How long a clicker quip stays up. Slightly longer lines linger; tiny jitter. */

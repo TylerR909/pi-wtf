@@ -5,8 +5,11 @@ import {
   CLICKER_IDLE_MS,
   createDigitPlay,
   HOLD_ARM_MS,
+  HOLD_MAX_AT_MS,
   HOLD_QUIP_WARMUP_MS,
   holdInterval,
+  isHoldMaxSpeed,
+  SPAM_GRACE_MS,
   tapRate,
 } from "./digit-play";
 
@@ -31,6 +34,13 @@ describe("holdInterval", () => {
   it("does not auto-repeat until the press is a real hold", () => {
     expect(holdInterval(HOLD_ARM_MS - 1)).toBeNull();
     expect(holdInterval(HOLD_ARM_MS)).toBe(170);
+  });
+
+  it("floors at max turbo after about 2.5s", () => {
+    expect(isHoldMaxSpeed(HOLD_ARM_MS)).toBe(false);
+    expect(isHoldMaxSpeed(HOLD_MAX_AT_MS - 1)).toBe(false);
+    expect(holdInterval(HOLD_MAX_AT_MS)).toBe(16);
+    expect(isHoldMaxSpeed(HOLD_MAX_AT_MS)).toBe(true);
   });
 });
 
@@ -100,7 +110,19 @@ describe("createDigitPlay lanes", () => {
     play.down("key", 2000);
     play.tick(2000 + HOLD_ARM_MS);
     expect(play.lane()).toBe("hold");
-    expect(play.tick(2000 + HOLD_QUIP_WARMUP_MS).quip).toBe("hold");
+    const roast = play.tick(2000 + HOLD_QUIP_WARMUP_MS);
+    expect(roast.quip).toBe("hold");
+    expect(roast.comeback).toBeFalsy();
+  });
+
+  it("click → hold is not a comeback even if hold quips already ran", () => {
+    const play = createDigitPlay({ holdQuipsEmitted: true });
+    taps(play, "pointer", 4, 0, 400);
+    play.down("key", 2000);
+    play.tick(2000 + HOLD_ARM_MS);
+    const roast = play.tick(2000 + HOLD_QUIP_WARMUP_MS);
+    expect(roast.quip).toBe("hold");
+    expect(roast.comeback).toBeFalsy();
   });
 
   it("space spam then trackpad clicks then a hold stays clicker", () => {
@@ -151,11 +173,43 @@ describe("createDigitPlay lanes", () => {
     expect(first.quip).toBe("hold");
     play.ack(HOLD_QUIP_WARMUP_MS, 2800);
     play.up("key", HOLD_QUIP_WARMUP_MS + 100);
+    play.tick(HOLD_QUIP_WARMUP_MS + 100 + SPAM_GRACE_MS);
+    expect(play.lane()).toBe("none");
 
     play.down("key", 20_000);
     const again = play.tick(20_000 + HOLD_QUIP_WARMUP_MS);
     expect(again.quip).toBe("hold");
     expect(again.comeback).toBe(true);
+  });
+
+  it("a brief space release is still the same hold, not a comeback", () => {
+    const play = createDigitPlay();
+    play.down("key", 0);
+    play.tick(HOLD_QUIP_WARMUP_MS);
+    play.ack(HOLD_QUIP_WARMUP_MS, 2800);
+    play.up("key", HOLD_QUIP_WARMUP_MS + 100);
+
+    play.down("key", HOLD_QUIP_WARMUP_MS + 400);
+    const again = play.tick(HOLD_QUIP_WARMUP_MS + 400 + HOLD_QUIP_WARMUP_MS);
+    expect(again.quip).toBe("hold");
+    expect(again.comeback).toBeFalsy();
+  });
+
+  it("hold → clicker → hold is a technique switch, not a comeback", () => {
+    const play = createDigitPlay();
+    play.down("key", 0);
+    play.tick(HOLD_QUIP_WARMUP_MS);
+    play.ack(HOLD_QUIP_WARMUP_MS, 2800);
+    play.up("key", HOLD_QUIP_WARMUP_MS + 100);
+
+    taps(play, "pointer", 4, HOLD_QUIP_WARMUP_MS + 200, 400);
+    expect(play.lane()).toBe("clicker");
+
+    play.down("key", HOLD_QUIP_WARMUP_MS + 2000);
+    play.tick(HOLD_QUIP_WARMUP_MS + 2000 + HOLD_ARM_MS);
+    const roast = play.tick(HOLD_QUIP_WARMUP_MS + 2000 + HOLD_QUIP_WARMUP_MS);
+    expect(roast.quip).toBe("hold");
+    expect(roast.comeback).toBeFalsy();
   });
 
   it("clicker idles, then exits after the grace period", () => {

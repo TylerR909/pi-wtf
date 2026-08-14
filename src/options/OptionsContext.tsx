@@ -1,3 +1,5 @@
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 import {
   createContext,
   type ReactNode,
@@ -8,10 +10,18 @@ import {
   useMemo,
   useState,
 } from "react";
-import { FontSizeControl, type FontSizeId, fontSizePx } from "../components/FontSizeControl";
+import {
+  cycleFontSize,
+  FontSizeControl,
+  type FontSizeId,
+  fontSizePx,
+} from "../components/FontSizeControl";
 import { FullscreenButton } from "../components/FullscreenButton";
+import { ProToggle } from "../components/ProToggle";
 import { useNarrow } from "../hooks/useNarrow";
+import { useHotkey } from "../hotkeys/HotkeyContext";
 import { isFullscreenNow, subscribeFullscreen, toggleFullscreen } from "../utils/fullscreen";
+import { loadJson, saveJson } from "../utils/storage";
 import { activeSlot, replaceSlot, slotWantsFullscreen } from "./slots";
 
 export type OptionsWanted = {
@@ -22,8 +32,12 @@ export type OptionsWanted = {
   idle?: boolean;
   /** When false, F does not toggle fullscreen (mash-key modes). Default true. */
   fullscreenKey?: boolean;
+  /** When false, +/− do not change font size (mash-key modes). Default true. */
+  fontSizeKey?: boolean;
   /** When false, R does not randomize the theme (mash-key modes). Default true. */
   themeKey?: boolean;
+  /** Header “Pro” toggle (Pi: hide unread digits). */
+  pro?: boolean;
 };
 
 type Slot = {
@@ -32,6 +46,9 @@ type Slot = {
   fontSize: boolean;
   idle: boolean;
   themeKey: boolean;
+  pro: boolean;
+  proOn: boolean;
+  setPro: (on: boolean) => void;
   fontValue: FontSizeId;
   setFont: (id: FontSizeId) => void;
 };
@@ -57,6 +74,8 @@ export function OptionsProvider({ children }: { children: ReactNode }) {
         cur.fontSize === slot.fontSize &&
         cur.idle === slot.idle &&
         cur.themeKey === slot.themeKey &&
+        cur.pro === slot.pro &&
+        cur.proOn === slot.proOn &&
         cur.fontValue === slot.fontValue
       ) {
         return prev;
@@ -87,11 +106,46 @@ export function OptionsProvider({ children }: { children: ReactNode }) {
 export function useOptions(wanted: OptionsWanted) {
   const ctx = useContext(ApiCtx);
   if (!ctx) throw new Error("useOptions requires <OptionsProvider>");
+  const { _ } = useLingui();
   const id = useId();
   const [fontSize, setFontSize] = useState<FontSizeId>(wanted.defaultFontSize ?? "m");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [proOn, setProOn] = useState(() => (wanted.pro ? loadJson("pi-pro", false) : false));
   const idle = wanted.idle !== false;
   const themeKey = wanted.themeKey !== false;
+  const pro = Boolean(wanted.pro);
+  const fsHot = Boolean(wanted.fullscreen) && wanted.fullscreenKey !== false;
+  const fontHot = Boolean(wanted.fontSize) && wanted.fontSizeKey !== false;
+
+  useHotkey({
+    key: "F",
+    label: _(msg`Fullscreen`),
+    enabled: fsHot,
+    onPress: () => {
+      void toggleFullscreen();
+    },
+  });
+  useHotkey({
+    key: "Esc",
+    label: _(msg`Exit fullscreen`),
+    enabled: Boolean(wanted.fullscreen),
+    onPress: () => {
+      // Native FS already exits on Esc. CSS fallback (iOS) needs a hand.
+      if (document.documentElement.dataset.appFs === "1") void toggleFullscreen();
+    },
+  });
+  useHotkey({
+    key: "+",
+    label: _(msg`Bigger type`),
+    enabled: fontHot,
+    onPress: () => setFontSize((cur) => cycleFontSize(cur, 1)),
+  });
+  useHotkey({
+    key: "-",
+    label: _(msg`Smaller type`),
+    enabled: fontHot,
+    onPress: () => setFontSize((cur) => cycleFontSize(cur, -1)),
+  });
 
   useEffect(() => {
     ctx.register({
@@ -100,37 +154,33 @@ export function useOptions(wanted: OptionsWanted) {
       fontSize: Boolean(wanted.fontSize),
       idle,
       themeKey,
+      pro,
+      proOn,
+      setPro: setProOn,
       fontValue: fontSize,
       setFont: setFontSize,
     });
     return () => ctx.unregister(id);
-  }, [ctx, id, wanted.fullscreen, wanted.fontSize, idle, themeKey, fontSize]);
+  }, [ctx, id, wanted.fullscreen, wanted.fontSize, idle, themeKey, pro, proOn, fontSize]);
+
+  useEffect(() => {
+    if (!pro) return;
+    saveJson("pi-pro", proOn);
+  }, [pro, proOn]);
 
   useEffect(() => {
     if (!wanted.fullscreen) return;
     const sync = () => setIsFullscreen(isFullscreenNow());
     sync();
-    const unsub = subscribeFullscreen(sync);
-    if (wanted.fullscreenKey === false) return unsub;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "f" && e.key !== "F") return;
-      const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT"))
-        return;
-      e.preventDefault();
-      void toggleFullscreen();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      unsub();
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [wanted.fullscreen, wanted.fullscreenKey]);
+    return subscribeFullscreen(sync);
+  }, [wanted.fullscreen]);
 
   return {
     isFullscreen,
     fontSize,
     fontPx: fontSizePx(fontSize),
+    pro: proOn,
+    setPro: setProOn,
   };
 }
 
@@ -161,11 +211,13 @@ export function OptionsHost({
   const wantFs = slotWantsFullscreen(slots, fullscreen);
   const active = activeSlot(slots);
   const fontSlot = fontSize && !exitOnly && active?.fontSize ? active : undefined;
-  if (!wantFs && !fontSlot) return <span className="chrome-top-balance" aria-hidden />;
+  const wantPro = !exitOnly && Boolean(active?.pro);
+  if (!wantFs && !fontSlot && !wantPro) return <span className="chrome-top-balance" aria-hidden />;
 
   return (
     <div className={`options-host ${visible ? "is-visible" : "is-hidden"}`}>
       {fontSlot && <FontSizeControl value={fontSlot.fontValue} onChange={fontSlot.setFont} />}
+      {wantPro && active && <ProToggle on={active.proOn} onChange={active.setPro} />}
       {wantFs && <FullscreenButton className="header-fs" iconOnly={narrow} />}
     </div>
   );

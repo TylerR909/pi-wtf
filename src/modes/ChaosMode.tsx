@@ -42,25 +42,33 @@ export function ChaosMode() {
     let cachedFg = "#e2b714";
     let cachedMuted = "#8b8b9a";
     let cachedHot = "#ff4d6d";
-    let celestia = false;
+    let cycle = false;
+    let cycleStops: [number, number, number][] = [];
 
-    // Teal → lavender → pink → mint → gold (her mane)
-    const MANE: ReadonlyArray<readonly [number, number, number]> = [
-      [62, 200, 196],
-      [201, 160, 232],
-      [240, 176, 216],
-      [110, 212, 168],
-      [232, 192, 74],
-    ];
+    const parseHex = (raw: string): [number, number, number] | null => {
+      const h = raw.trim().replace("#", "");
+      if (h.length === 3) {
+        return [parseInt(h[0]! + h[0], 16), parseInt(h[1]! + h[1], 16), parseInt(h[2]! + h[2], 16)];
+      }
+      if (h.length === 6) {
+        return [
+          parseInt(h.slice(0, 2), 16),
+          parseInt(h.slice(2, 4), 16),
+          parseInt(h.slice(4, 6), 16),
+        ];
+      }
+      return null;
+    };
 
-    const maneRgb = (t: number): string => {
-      const n = MANE.length;
+    const cycleRgb = (t: number): string => {
+      const n = cycleStops.length;
+      if (n === 0) return cachedFg;
       const x = ((t % 1) + 1) % 1;
       const f = x * n;
       const i = Math.floor(f) % n;
       const u = f - i;
-      const a = MANE[i]!;
-      const b = MANE[(i + 1) % n]!;
+      const a = cycleStops[i]!;
+      const b = cycleStops[(i + 1) % n]!;
       const r = (a[0] + (b[0] - a[0]) * u) | 0;
       const g = (a[1] + (b[1] - a[1]) * u) | 0;
       const bl = (a[2] + (b[2] - a[2]) * u) | 0;
@@ -73,7 +81,14 @@ export function ChaosMode() {
       cachedFg = style.getPropertyValue("--accent").trim() || "#e2b714";
       cachedMuted = style.getPropertyValue("--fg-muted").trim() || "#8b8b9a";
       cachedHot = style.getPropertyValue("--pi-hot").trim() || "#ff4d6d";
-      celestia = document.documentElement.dataset.theme === "celestia";
+      cycle = document.documentElement.dataset.cycle === "1";
+      cycleStops = [];
+      if (cycle) {
+        for (let i = 1; i <= 5; i++) {
+          const rgb = parseHex(style.getPropertyValue(`--cycle-${i}`));
+          if (rgb) cycleStops.push(rgb);
+        }
+      }
     };
 
     const resize = () => {
@@ -136,15 +151,18 @@ export function ChaosMode() {
         const nPi = PI_DIGITS.length;
         const hot = new Set<number>();
         const glow = new Set<number>();
+        const hotAt = new Map<number, number>();
+        const glowAt = new Map<number, number>();
         for (let i = 0; i < d.len - 2; i++) {
           if (
             PI_DIGITS[(d.idx - i + nPi * 8) % nPi] === "4" &&
             PI_DIGITS[(d.idx - (i + 1) + nPi * 8) % nPi] === "1" &&
             PI_DIGITS[(d.idx - (i + 2) + nPi * 8) % nPi] === "3"
           ) {
-            hot.add(i);
-            hot.add(i + 1);
-            hot.add(i + 2);
+            for (let k = 0; k < 3; k++) {
+              hot.add(i + k);
+              if (!hotAt.has(i + k)) hotAt.set(i + k, i);
+            }
           }
         }
         for (let i = 0; i < d.len - 3; i++) {
@@ -153,10 +171,10 @@ export function ChaosMode() {
           const c = PI_DIGITS[(d.idx - (i + 2) + nPi * 8) % nPi];
           const e = PI_DIGITS[(d.idx - (i + 3) + nPi * 8) % nPi];
           if (a === "2" && b === "9" && c === "5" && e === "1") {
-            glow.add(i);
-            glow.add(i + 1);
-            glow.add(i + 2);
-            glow.add(i + 3);
+            for (let k = 0; k < 4; k++) {
+              glow.add(i + k);
+              if (!glowAt.has(i + k)) glowAt.set(i + k, i);
+            }
             last1592 = now;
           }
         }
@@ -168,14 +186,27 @@ export function ChaosMode() {
           if (yy < -20 || yy > h + 20) continue;
           const isGlow = glow.has(i);
           const isHot = !isGlow && hot.has(i);
+          const unitHue = (origin: number) => now / 14000 + d.x / Math.max(1, w) + origin * 0.07;
           if (isGlow) {
-            const pulse = 0.55 + 0.45 * Math.sin(now / 160);
-            ctx.fillStyle = `rgba(255, 36, 56, ${pulse})`;
-            ctx.shadowColor = "rgba(255, 36, 56, 0.9)";
-            ctx.shadowBlur = 12 + 8 * pulse;
-          } else if (celestia) {
+            const pulse = 0.65 + 0.35 * Math.sin(now / 160);
+            if (cycle && cycleStops.length) {
+              const col = cycleRgb(unitHue(glowAt.get(i) ?? i));
+              ctx.fillStyle = `rgba(255, 255, 255, ${pulse})`;
+              ctx.shadowColor = col;
+              ctx.shadowBlur = 26 + 14 * pulse;
+            } else {
+              ctx.fillStyle = `rgba(255, 36, 56, ${pulse})`;
+              ctx.shadowColor = "rgba(255, 36, 56, 0.9)";
+              ctx.shadowBlur = 12 + 8 * pulse;
+            }
+          } else if (isHot && cycle && cycleStops.length) {
+            const col = cycleRgb(unitHue(hotAt.get(i) ?? i));
+            ctx.fillStyle = col;
+            ctx.shadowColor = col;
+            ctx.shadowBlur = 18;
+          } else if (cycle && cycleStops.length) {
             const hue = now / 14000 + d.x / Math.max(1, w) + i * 0.07;
-            ctx.fillStyle = maneRgb(hue);
+            ctx.fillStyle = cycleRgb(hue);
             ctx.shadowColor = i === 0 ? ctx.fillStyle : "transparent";
             ctx.shadowBlur = i === 0 ? 10 : 0;
           } else {
@@ -185,6 +216,7 @@ export function ChaosMode() {
           ctx.globalAlpha = isGlow || isHot || i === 0 ? 1 : Math.max(0.15, 1 - i / d.len);
           ctx.font = `${isGlow || isHot ? "bold " : ""}${d.size}px ui-monospace, monospace`;
           ctx.fillText(ch, d.x, yy);
+          ctx.shadowBlur = 0;
         }
         if (Math.random() < 0.02) d.idx = (d.idx + 1) % PI_DIGITS.length;
       }
@@ -237,7 +269,7 @@ export function ChaosMode() {
       )}
       {narrow && (
         <p className={`mode-hint chaos-hint chaos-shake-hint ${chromeOn ? "" : "is-hidden"}`}>
-          <Trans>Shake to change theme</Trans>
+          <Trans>Shake anywhere to change theme</Trans>
         </p>
       )}
     </div>
